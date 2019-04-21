@@ -96,13 +96,20 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Note">
-<meta property="og:url" content="https://1065763582.github.io/mynote/index.html">
+  <meta name="description" content="用多线程只有一个目的，那就是更好的利用cpu的资源 java.lang.Thread状态线程的状态定义在Thread内部的枚举类里， 共六个123456789101112131415161718192021222324252627282930313233343536373839404142434445464748public enum State &amp;#123;        /**     * 线">
+<meta name="keywords" content="java,juc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="thread">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/04/21/thread/index.html">
 <meta property="og:site_name" content="Note">
+<meta property="og:description" content="用多线程只有一个目的，那就是更好的利用cpu的资源 java.lang.Thread状态线程的状态定义在Thread内部的枚举类里， 共六个123456789101112131415161718192021222324252627282930313233343536373839404142434445464748public enum State &amp;#123;        /**     * 线">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://i.loli.net/2019/04/21/5cbc25fa0fa43.png">
+<meta property="og:updated_time" content="2019-04-21T12:10:02.728Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Note">
+<meta name="twitter:title" content="thread">
+<meta name="twitter:description" content="用多线程只有一个目的，那就是更好的利用cpu的资源 java.lang.Thread状态线程的状态定义在Thread内部的枚举类里， 共六个123456789101112131415161718192021222324252627282930313233343536373839404142434445464748public enum State &amp;#123;        /**     * 线">
+<meta name="twitter:image" content="https://i.loli.net/2019/04/21/5cbc25fa0fa43.png">
 
 
 
@@ -110,7 +117,7 @@
 
   
   
-  <link rel="canonical" href="https://1065763582.github.io/mynote/">
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/04/21/thread/">
 
 
 
@@ -120,7 +127,7 @@
   };
 </script>
 
-  <title>Note</title>
+  <title>thread | Note</title>
   
 
 
@@ -168,8 +175,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -269,9 +275,9 @@
           
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -303,10 +309,8 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/mynote/2019/04/21/thread/" class="post-title-link" itemprop="url">thread</a>
+          <h1 class="post-title" itemprop="name headline">thread
+
               
             
           </h1>
@@ -352,6 +356,13 @@
           
 
           
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
           
 
@@ -370,9 +381,7 @@
       
 
       
-        
-          
-            <p>用多线程只有一个目的，那就是更好的利用cpu的资源</p>
+        <p>用多线程只有一个目的，那就是更好的利用cpu的资源</p>
 <h2 id="java-lang-Thread"><a href="#java-lang-Thread" class="headerlink" title="java.lang.Thread"></a>java.lang.Thread</h2><h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><p>线程的状态定义在Thread内部的枚举类里， 共六个<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> State &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程对象对创建后，进入新建状态</span></span><br><span class="line"><span class="comment">     */</span>        </span><br><span class="line">    NEW,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当调用线程对象的start()方法，进入可运行状态。</span></span><br><span class="line"><span class="comment">     * 可运行状态不一定在运行，可能在等待线程调度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    RUNNABLE, </span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取synchronized同步锁失败</span></span><br><span class="line"><span class="comment">     * 进入阻塞状态</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    BLOCKED,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程需要等待其他线程做出一些特定动作（通知或中断）</span></span><br><span class="line"><span class="comment">     * 进入等待状态</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 处于这种状态的线程不会被分配CPU执行时间，</span></span><br><span class="line"><span class="comment">     * 它们要等待被显式地唤醒，否则会处于无限期等待的状态。</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    WAITING,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程需要等待其他线程做出一些特定动作（通知或中断）</span></span><br><span class="line"><span class="comment">     * 但是可以在指定的时间后自行返回</span></span><br><span class="line"><span class="comment">     * 进入超实等待状态</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 处于这种状态的线程不会被分配CPU执行时间，</span></span><br><span class="line"><span class="comment">     * 但不会无限期等待被其他线程显示地唤醒，</span></span><br><span class="line"><span class="comment">     * 在达到一定时间后它们会自动唤醒。</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    TIMED_WAITING,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程已经执行完毕</span></span><br><span class="line"><span class="comment">     * 进入终止状态</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 在一个终止的线程上调用start()方法，</span></span><br><span class="line"><span class="comment">     * 会抛出java.lang.IllegalThreadStateException异常</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    TERMINATED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>转换流程如下图：<br><img src="https://i.loli.net/2019/04/21/5cbc25fa0fa43.png" alt="状态转换"></p>
 <h3 id="常用方法"><a href="#常用方法" class="headerlink" title="常用方法"></a>常用方法</h3><h4 id="start"><a href="#start" class="headerlink" title="start"></a>start</h4><p>start方法是启动一个新的线程来执行，首先判断Thread的状态是否为New它的主要逻辑是通过native方法star0实现的，Java虚拟机将会调用这个线程的run方法， 而run方法是在当前线程执行.</p>
@@ -414,8 +423,6 @@
 </li>
 </ol>
 
-          
-        
       
     </div>
 
@@ -436,161 +443,38 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/04/20/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="哩哩哩">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/mynote/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Note">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/mynote/2019/04/20/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-04-20 23:32:40" itemprop="dateCreated datePublished" datetime="2019-04-20T23:32:40+08:00">2019-04-20</time>
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/mynote/tags/java/" rel="tag"># java</a>
           
-            
-            
+            <a href="/mynote/tags/juc/" rel="tag"># juc</a>
           
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
       
 
       
       
-        <div class="post-eof"></div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/04/20/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
       
     </footer>
   </div>
@@ -600,14 +484,15 @@
   </article>
 
 
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -627,8 +512,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -689,6 +583,23 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#java-lang-Thread"><span class="nav-number">1.</span> <span class="nav-text">java.lang.Thread</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#状态"><span class="nav-number">1.1.</span> <span class="nav-text">状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常用方法"><span class="nav-number">1.2.</span> <span class="nav-text">常用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#start"><span class="nav-number">1.2.1.</span> <span class="nav-text">start</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sleep"><span class="nav-number">1.2.2.</span> <span class="nav-text">sleep</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#yield"><span class="nav-number">1.2.3.</span> <span class="nav-text">yield</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#join"><span class="nav-number">1.2.4.</span> <span class="nav-text">join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#setPriority"><span class="nav-number">1.2.5.</span> <span class="nav-text">setPriority</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#setDaemon"><span class="nav-number">1.2.6.</span> <span class="nav-text">setDaemon</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程中断"><span class="nav-number">1.3.</span> <span class="nav-text">线程中断</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#interrupt"><span class="nav-number">1.3.1.</span> <span class="nav-text">interrupt</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#interrupted"><span class="nav-number">1.3.2.</span> <span class="nav-text">interrupted</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#isInterrupted"><span class="nav-number">1.3.3.</span> <span class="nav-text">isInterrupted</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用中断"><span class="nav-number">1.3.4.</span> <span class="nav-text">使用中断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#禁用stop的原因"><span class="nav-number">1.3.5.</span> <span class="nav-text">禁用stop的原因</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异常处理"><span class="nav-number">1.4.</span> <span class="nav-text">异常处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocal相关属性"><span class="nav-number">1.5.</span> <span class="nav-text">ThreadLocal相关属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁"><span class="nav-number">1.6.</span> <span class="nav-text">死锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#demo"><span class="nav-number">1.6.1.</span> <span class="nav-text">demo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#死锁产生的原因"><span class="nav-number">1.6.2.</span> <span class="nav-text">死锁产生的原因</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#死锁产生的必要条件"><span class="nav-number">1.6.3.</span> <span class="nav-text">死锁产生的必要条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#处理死锁的基本方法"><span class="nav-number">1.6.4.</span> <span class="nav-text">处理死锁的基本方法</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
@@ -814,6 +725,10 @@
 
 
   
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
 
   
 
@@ -829,6 +744,8 @@
 
   
 
+
+  
 
 
   
