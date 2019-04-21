@@ -331,7 +331,7 @@
                 
               
 
-              <time title="Created: 2019-04-21 13:39:18 / Modified: 16:14:21" itemprop="dateCreated datePublished" datetime="2019-04-21T13:39:18+08:00">2019-04-21</time>
+              <time title="Created: 2019-04-21 13:39:18 / Modified: 17:32:37" itemprop="dateCreated datePublished" datetime="2019-04-21T13:39:18+08:00">2019-04-21</time>
             
 
             
@@ -372,10 +372,20 @@
       
         
           
-            <h2 id="java-lang-Thread"><a href="#java-lang-Thread" class="headerlink" title="java.lang.Thread"></a>java.lang.Thread</h2><h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><p>线程的状态定义在Thread内部的枚举类里， 共六个<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> State &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程对象对创建后，进入新建状态</span></span><br><span class="line"><span class="comment">     */</span>        </span><br><span class="line">    NEW,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当调用线程对象的start()方法，进入可运行状态。</span></span><br><span class="line"><span class="comment">     * 可运行状态不一定在运行，可能在等待线程调度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    RUNNABLE, </span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取synchronized同步锁失败</span></span><br><span class="line"><span class="comment">     * 进入阻塞状态</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    BLOCKED,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程需要等待其他线程做出一些特定动作（通知或中断）</span></span><br><span class="line"><span class="comment">     * 进入等待状态</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 处于这种状态的线程不会被分配CPU执行时间，</span></span><br><span class="line"><span class="comment">     * 它们要等待被显式地唤醒，否则会处于无限期等待的状态。</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    WAITING,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程需要等待其他线程做出一些特定动作（通知或中断）</span></span><br><span class="line"><span class="comment">     * 但是可以在指定的时间后自行返回</span></span><br><span class="line"><span class="comment">     * 进入超实等待状态</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 处于这种状态的线程不会被分配CPU执行时间，</span></span><br><span class="line"><span class="comment">     * 但不会无限期等待被其他线程显示地唤醒，</span></span><br><span class="line"><span class="comment">     * 在达到一定时间后它们会自动唤醒。</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    TIMED_WAITING,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程已经执行完毕</span></span><br><span class="line"><span class="comment">     * 进入终止状态</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 在一个终止的线程上调用start()方法，</span></span><br><span class="line"><span class="comment">     * 会抛出java.lang.IllegalThreadStateException异常</span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    TERMINATED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>转换流程如下图：<br><img src="https://i.loli.net/2019/04/21/5cbc25fa0fa43.png" alt="状态转换"></p>
-
+            <p>
+              用多线程只有一个目的，那就是更好的利用cpu的资源
+java.lang.Thread状态线程的状态定义在Thread内部的枚举类里， 共六个public enum State &#123;      
+              ...
+            </p>
+          <!--noindex-->
           
+            <div class="post-button text-center">
+              <a class="btn" href="/mynote/2019/04/21/thread/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
         
       
     </div>
@@ -512,17 +522,19 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
+            <p>
+              Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any pro
+              ...
+            </p>
+          <!--noindex-->
           
+            <div class="post-button text-center">
+              <a class="btn" href="/mynote/2019/04/20/hello-world/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
         
       
     </div>
