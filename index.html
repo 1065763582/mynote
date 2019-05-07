@@ -306,7 +306,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/mynote/2019/05/06/conditionObject/" class="post-title-link" itemprop="url">ConditionObject</a>
+                <a href="/mynote/2019/05/06/conditionObject/" class="post-title-link" itemprop="url">AbstractQueuedSynchronizer - ConditionObject</a>
               
             
           </h1>
@@ -331,12 +331,24 @@
                 
               
 
-              <time title="Created: 2019-05-06 22:14:11 / Modified: 22:14:35" itemprop="dateCreated datePublished" datetime="2019-05-06T22:14:11+08:00">2019-05-06</time>
+              <time title="Created: 2019-05-06 22:14:11" itemprop="dateCreated datePublished" datetime="2019-05-06T22:14:11+08:00">2019-05-06</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-07 22:34:08" itemprop="dateModified" datetime="2019-05-07T22:34:08+08:00">2019-05-07</time>
               
             
           </span>
@@ -373,13 +385,187 @@
         
           
             <p>
-              
-              
+              作为Lock实现基础的AbstractQueuedSynchronizer的条件实现，这个类是Serializable，但是所有字段都是transient的，反序列化后不会有waiters。作为AQS的内部类，通过实现Condition接口提供对管程形式的条件支持，ConditionObject只用
+              ...
             </p>
           <!--noindex-->
           
             <div class="post-button text-center">
               <a class="btn" href="/mynote/2019/05/06/conditionObject/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/04/28/abstarctQueuedSynchronizer1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/mynote/2019/04/28/abstarctQueuedSynchronizer1/" class="post-title-link" itemprop="url">AbstractQueuedSynchronizer - 共享模式</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-04-28 20:17:43" itemprop="dateCreated datePublished" datetime="2019-04-28T20:17:43+08:00">2019-04-28</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-07 21:32:49" itemprop="dateModified" datetime="2019-05-07T21:32:49+08:00">2019-05-07</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>
+              共享模式多个线程能持有锁，需要实现一下两个方法
+
+tryAcquireShared
+tryReleaseShared
+
+获取锁的方式有三种：
+
+acquireShared: 不响应中断获取锁
+acquireSharedInterruptibly: 响应中断获取锁
+tryAcquireSharedNa
+              ...
+            </p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/mynote/2019/04/28/abstarctQueuedSynchronizer1/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -459,7 +645,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/mynote/2019/04/24/abstractQueuedSynchronizer/" class="post-title-link" itemprop="url">AbstractQueuedSynchronizer</a>
+                <a href="/mynote/2019/04/24/abstractQueuedSynchronizer/" class="post-title-link" itemprop="url">AbstractQueuedSynchronizer - 独占模式</a>
               
             
           </h1>
@@ -501,7 +687,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-05-06 22:20:03" itemprop="dateModified" datetime="2019-05-06T22:20:03+08:00">2019-05-06</time>
+                <time title="Modified: 2019-05-07 21:11:10" itemprop="dateModified" datetime="2019-05-07T21:11:10+08:00">2019-05-07</time>
               
             
           </span>
@@ -1112,7 +1298,7 @@ JAVA-API注释：这个类提供线程局部变量。 这些变量与正常的�
                 
                   <a href="/mynote/archives/">
                 
-                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
