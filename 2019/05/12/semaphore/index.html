@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/mynote/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/mynote/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/mynote/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/mynote/images/favicon-32x32-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/mynote/images/favicon-16x16-next.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/mynote/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/mynote/',
+    scheme: 'Mist',
+    version: '7.1.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="JDK注释：计数信号量。 从概念上讲，信号量保持一组许可。信号量通常用于限制线程数，而不是访问某些（物理或逻辑）资源。在执行锁定的代码之前，每个线程必须从信号量获取许可，保证资源可供使用。当线程完成锁定的代码后，它将返回到池中，并且许可证将返回到信号量，允许另一个线程获取该代码执行。信号量初始化为1，并且使用的信号量最多只有一个许可证可用作互斥锁。这通常称为二进制信号量，因为它只有两种状态：一种是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Semaphore">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/05/12/semaphore/index.html">
+<meta property="og:site_name" content="Note">
+<meta property="og:description" content="JDK注释：计数信号量。 从概念上讲，信号量保持一组许可。信号量通常用于限制线程数，而不是访问某些（物理或逻辑）资源。在执行锁定的代码之前，每个线程必须从信号量获取许可，保证资源可供使用。当线程完成锁定的代码后，它将返回到池中，并且许可证将返回到信号量，允许另一个线程获取该代码执行。信号量初始化为1，并且使用的信号量最多只有一个许可证可用作互斥锁。这通常称为二进制信号量，因为它只有两种状态：一种是">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-05-12T08:32:07.793Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Semaphore">
+<meta name="twitter:description" content="JDK注释：计数信号量。 从概念上讲，信号量保持一组许可。信号量通常用于限制线程数，而不是访问某些（物理或逻辑）资源。在执行锁定的代码之前，每个线程必须从信号量获取许可，保证资源可供使用。当线程完成锁定的代码后，它将返回到池中，并且许可证将返回到信号量，允许另一个线程获取该代码执行。信号量初始化为1，并且使用的信号量最多只有一个许可证可用作互斥锁。这通常称为二进制信号量，因为它只有两种状态：一种是">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/05/12/semaphore/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Semaphore | Note</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/mynote/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/05/12/semaphore/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Semaphore
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-12 14:27:22 / Modified: 16:32:07" itemprop="dateCreated datePublished" datetime="2019-05-12T14:27:22+08:00">2019-05-12</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>JDK注释：计数信号量。 从概念上讲，信号量保持一组许可。信号量通常用于限制线程数，而不是访问某些（物理或逻辑）资源。在执行锁定的代码之前，每个线程必须从信号量获取许可，保证资源可供使用。当线程完成锁定的代码后，它将返回到池中，并且许可证将返回到信号量，允许另一个线程获取该代码执行。信号量初始化为1，并且使用的信号量最多只有一个许可证可用作互斥锁。这通常称为二进制信号量，因为它只有两种状态：一种是可用的，或者是零可用的。当以这种方式使用时，二进制信号量具有属性（与许多java.util.concurrent.locks.Lock实现不同），“lock”可以由除了所有者之外的线程释放（因为信号量没有所有权的概念） ）。这在某些特定的上下文中很有用，例如死锁恢复。<br>Semaphore的构造函数可选择接受公平参数。设置为false时，是非公平锁。另请注意，不定时的tryAcquire方法不遵守公平性设置，但会接受任何可用的许可。<br>通常，用于控制资源访问的信号量应初始化为公平，以确保没有线程缺乏访问资源。当将信号量用于其他类型的同步控制时，非公平锁的吞吐量优势通常超过公平锁。该类还提供了一次获取和释放多个许可的便捷方法。当使用这些方法而没有公平地设定时，要注意线程饥饿的风险增加</p>
+<h1 id="java-util-concurrent-Semaphore"><a href="#java-util-concurrent-Semaphore" class="headerlink" title="java.util.concurrent.Semaphore"></a>java.util.concurrent.Semaphore</h1><h2 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 使用给定的许可数量，创建一个非公平的信号量</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> permits 许可数量 - 可用的初始许可证数量。 </span></span><br><span class="line"><span class="comment"> * 此值可能为负值，在这种情况下，在获取之前必须先释放</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;</span><br><span class="line">    sync = <span class="keyword">new</span> NonfairSync(permits);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 使用公平策略参数创建一个ReentrantLock的实例</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> permits 许可数量 - 可用的初始许可证数量。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> fair true可以保证许可按照FIFO的顺序发放。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits, <span class="keyword">boolean</span> fair)</span> </span>&#123;</span><br><span class="line">    sync = fair ? <span class="keyword">new</span> FairSync(permits) : <span class="keyword">new</span> NonfairSync(permits);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="公平锁和非公平锁的父类-Sync"><a href="#公平锁和非公平锁的父类-Sync" class="headerlink" title="公平锁和非公平锁的父类 - Sync"></a>公平锁和非公平锁的父类 - Sync</h2><p>公平锁和非公平锁的区别：<br>非公平锁：线程进入队列立刻就会尝试去获取一次锁，获取到锁就执行<br>公平锁：线程进入队列，先看有没有前驱节点（即是否存在先进入队列到线程），没有才会去获取锁，否则在队列排队</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 信号量的同步实现。 使用AQS状态来表示许可。 分为公平和不公平的版本。</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Sync</span> <span class="keyword">extends</span> <span class="title">AbstractQueuedSynchronizer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1192457210091910933L</span>;</span><br><span class="line">    <span class="comment">// 构造函数: permits 表示许可数量。</span></span><br><span class="line">    Sync(<span class="keyword">int</span> permits) &#123;</span><br><span class="line">        setState(permits);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取当前的许可数量</span></span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getPermits</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> getState();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 非公平的获取共享锁</span></span><br><span class="line">    <span class="comment">// 写在父类的原因是因为 tryAcquire会忽略公平性设置</span></span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">nonfairTryAcquireShared</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="comment">// 获取当前许可数量</span></span><br><span class="line">            <span class="keyword">int</span> available = getState();</span><br><span class="line">            <span class="comment">// 当前线程获取许可后，剩余的许可</span></span><br><span class="line">            <span class="keyword">int</span> remaining = available - acquires;</span><br><span class="line">            <span class="comment">// 若剩余许可小于0， 直接返回负数，表示获取失败</span></span><br><span class="line">            <span class="comment">// 若剩余许可大于等于0，表示可以获取许可，然后CAS更新state，返回剩余的许可数</span></span><br><span class="line">            <span class="comment">// CAS更新是可能会失败， 失败是因为有其他线程抢先一步获取或者释放了许可导致state值改变，</span></span><br><span class="line">            <span class="comment">// 此时进入第二次循环，直到获取到许可或者获取失败</span></span><br><span class="line">            <span class="keyword">if</span> (remaining &lt; <span class="number">0</span> ||</span><br><span class="line">                compareAndSetState(available, remaining))</span><br><span class="line">                <span class="keyword">return</span> remaining;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 释放许可数量</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryReleaseShared</span><span class="params">(<span class="keyword">int</span> releases)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="comment">// 获取当前到许可数量</span></span><br><span class="line">            <span class="keyword">int</span> current = getState();</span><br><span class="line">            <span class="comment">// 等到释放后到许可数量</span></span><br><span class="line">            <span class="keyword">int</span> next = current + releases;</span><br><span class="line">            <span class="comment">// 参数检查，若释放一个负数的许可，则抛出异常</span></span><br><span class="line">            <span class="keyword">if</span> (next &lt; current) <span class="comment">// overflow</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"Maximum permit count exceeded"</span>);</span><br><span class="line">            <span class="keyword">if</span> (compareAndSetState(current, next))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 减少许可数量</span></span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">reducePermits</span><span class="params">(<span class="keyword">int</span> reductions)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="comment">// 获取当前到许可数量</span></span><br><span class="line">            <span class="keyword">int</span> current = getState();</span><br><span class="line">            <span class="comment">// 计算减少后的许可数量</span></span><br><span class="line">            <span class="keyword">int</span> next = current - reductions;</span><br><span class="line">            <span class="comment">// 参数检查， 若减少一个负数，则抛出异常</span></span><br><span class="line">            <span class="keyword">if</span> (next &gt; current) <span class="comment">// underflow</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"Permit count underflow"</span>);</span><br><span class="line">            <span class="comment">// CAS更新为新的许可数量，CAS可能失败，失败是因为有其他线程抢先一步获取或者释放了许可导致state值改变，</span></span><br><span class="line">            <span class="keyword">if</span> (compareAndSetState(current, next))</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 回收全部的许可</span></span><br><span class="line">    <span class="comment">// 返回回收的许可数量</span></span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">drainPermits</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="comment">// 获取当前到许可数量</span></span><br><span class="line">            <span class="keyword">int</span> current = getState();</span><br><span class="line">            <span class="comment">// 若当前许可等于0，直接返回0</span></span><br><span class="line">            <span class="comment">// 若当前许可大于0，则将state更新为0，并返回之前的许可值</span></span><br><span class="line">            <span class="keyword">if</span> (current == <span class="number">0</span> || compareAndSetState(current, <span class="number">0</span>))</span><br><span class="line">                <span class="keyword">return</span> current;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="公平共享锁"><a href="#公平共享锁" class="headerlink" title="公平共享锁"></a>公平共享锁</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">FairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">2014338818796000944L</span>;</span><br><span class="line">    FairSync(<span class="keyword">int</span> permits) &#123;</span><br><span class="line">        <span class="keyword">super</span>(permits);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 重写AQS的tryAcquireShared方法实现共享锁</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">tryAcquireShared</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="comment">// 如果同步队列存在等待许可的线程节点</span></span><br><span class="line">            <span class="keyword">if</span> (hasQueuedPredecessors())</span><br><span class="line">                <span class="comment">// 获取失败，进入AQS同步队列排队</span></span><br><span class="line">                <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">            <span class="comment">// 获取当前许可数</span></span><br><span class="line">            <span class="keyword">int</span> available = getState();</span><br><span class="line">            <span class="comment">// 计算剩余的许可数</span></span><br><span class="line">            <span class="keyword">int</span> remaining = available - acquires;</span><br><span class="line">            <span class="comment">// 若剩余许可小于0， 直接返回负数，表示获取失败</span></span><br><span class="line">            <span class="comment">// 若剩余许可大于等于0，表示可以获取许可，然后CAS更新state，返回剩余的许可数</span></span><br><span class="line">            <span class="comment">// CAS更新是可能会失败， 失败是因为有其他线程抢先一步获取或者释放了许可导致state值改变，</span></span><br><span class="line">            <span class="comment">// 此时进入第二次循环，直到获取到许可或者获取失败</span></span><br><span class="line">            <span class="keyword">if</span> (remaining &lt; <span class="number">0</span> ||</span><br><span class="line">                compareAndSetState(available, remaining))</span><br><span class="line">                <span class="keyword">return</span> remaining;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="非公平共享锁"><a href="#非公平共享锁" class="headerlink" title="非公平共享锁"></a>非公平共享锁</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">NonfairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">2694183684443567898L</span>;</span><br><span class="line">    NonfairSync(<span class="keyword">int</span> permits) &#123;</span><br><span class="line">        <span class="keyword">super</span>(permits);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 重写AQS的tryAcquireShared方法实现共享锁</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">tryAcquireShared</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nonfairTryAcquireShared(acquires);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="获取许可"><a href="#获取许可" class="headerlink" title="获取许可"></a>获取许可</h2><h3 id="不响应中断也不超时"><a href="#不响应中断也不超时" class="headerlink" title="不响应中断也不超时"></a>不响应中断也不超时</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认获取一个许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquireUninterruptibly</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 调用AQS方法</span></span><br><span class="line">    sync.acquireShared(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取指定数量的许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquireUninterruptibly</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (permits &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    sync.acquireShared(permits);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试一次获取一个许可，无论成功还是失败都立即返回</span></span><br><span class="line"><span class="comment">// 获取许可成功返回true</span></span><br><span class="line"><span class="comment">// 此方法会忽略公平性设置。如果需要公平性设置，使用tryAcquire(0, TimeUnit.SECONDS)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sync.nonfairTryAcquireShared(<span class="number">1</span>) &gt;= <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试一次获取给定的许可数量，无论成功还是失败都立即返回</span></span><br><span class="line"><span class="comment">// 获取许可成功返回true</span></span><br><span class="line"><span class="comment">// 此方法会忽略公平性设置。如果需要公平性设置，使用tryAcquire(X, 0, TimeUnit.SECONDS)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (permits &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="keyword">return</span> sync.nonfairTryAcquireShared(permits) &gt;= <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="响应中断"><a href="#响应中断" class="headerlink" title="响应中断"></a>响应中断</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认获取一个许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// 调用AQS方法</span></span><br><span class="line">    sync.acquireSharedInterruptibly(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取指定数量的许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> permits)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (permits &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    sync.acquireSharedInterruptibly(permits);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="响应超时和中断"><a href="#响应超时和中断" class="headerlink" title="响应超时和中断"></a>响应超时和中断</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用自定义的数字，和时间单位，默认获取一个许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// 调用AQS方法</span></span><br><span class="line">    <span class="keyword">return</span> sync.tryAcquireSharedNanos(<span class="number">1</span>, unit.toNanos(timeout));</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 获取指定数量的许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> permits, <span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (permits &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="keyword">return</span> sync.tryAcquireSharedNanos(permits, unit.toNanos(timeout));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="释放许可"><a href="#释放许可" class="headerlink" title="释放许可"></a>释放许可</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 释放许可，将其返回信号量，将可用许可证数量增加一个。</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 调用AQS方法</span></span><br><span class="line">    sync.releaseShared(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 释放给定数量的许可</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (permits &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    sync.releaseShared(permits);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><h4 id="获取当前可用的许可"><a href="#获取当前可用的许可" class="headerlink" title="获取当前可用的许可"></a>获取当前可用的许可</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 返回AQS的state</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">availablePermits</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sync.getPermits();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="获取并返回当前可用的所有许可"><a href="#获取并返回当前可用的所有许可" class="headerlink" title="获取并返回当前可用的所有许可"></a>获取并返回当前可用的所有许可</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">drainPermits</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sync.drainPermits();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="判断当前信号量是否是公平策略"><a href="#判断当前信号量是否是公平策略" class="headerlink" title="判断当前信号量是否是公平策略"></a>判断当前信号量是否是公平策略</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isFair</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sync <span class="keyword">instanceof</span> FairSync;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="判断是否存在线程在等待次信号量"><a href="#判断是否存在线程在等待次信号量" class="headerlink" title="判断是否存在线程在等待次信号量"></a>判断是否存在线程在等待次信号量</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">hasQueuedThreads</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sync.hasQueuedThreads();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="获取等待资源的线程数"><a href="#获取等待资源的线程数" class="headerlink" title="获取等待资源的线程数"></a>获取等待资源的线程数</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getQueueLength</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> sync.getQueueLength();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="toString-NaN"><a href="#toString-NaN" class="headerlink" title="toString"></a>toString</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 返回标识此信号量及其状态的字符串。 括号中的状态包括字符串“Permits =”，后跟许可数。</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">super</span>.toString() + <span class="string">"[Permits = "</span> + sync.getPermits() + <span class="string">"]"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="AQS共享锁实现和独占锁实现的区别"><a href="#AQS共享锁实现和独占锁实现的区别" class="headerlink" title="AQS共享锁实现和独占锁实现的区别"></a>AQS共享锁实现和独占锁实现的区别</h2><p>ReentrantLock是AQS的独占锁实现，Semaphore是AQS的共享锁实现</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">ReentrantLock</th>
+<th style="text-align:center">Semaphore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">state含义</td>
+<td style="text-align:center">同一线程获取锁的次数</td>
+<td style="text-align:center">许可数量</td>
+</tr>
+<tr>
+<td style="text-align:center">初始状态</td>
+<td style="text-align:center">state == 0</td>
+<td style="text-align:center">state ==  构造函数的permits</td>
+</tr>
+<tr>
+<td style="text-align:center">成功获取资源</td>
+<td style="text-align:center">state+1</td>
+<td style="text-align:center">state-获取数量 &gt;= 0</td>
+</tr>
+<tr>
+<td style="text-align:center">无可用资源</td>
+<td style="text-align:center">state &gt; 0</td>
+<td style="text-align:center">state == 0</td>
+</tr>
+</tbody>
+</table>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/05/11/reentrantLock/" rel="next" title="ReentrantLock">
+                <i class="fa fa-chevron-left"></i> ReentrantLock
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/mynote/2019/05/14/xpath/" rel="prev" title="XPath">
+                XPath <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">哩厘理濿</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/mynote/archives/">
+                
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#java-util-concurrent-Semaphore"><span class="nav-number">1.</span> <span class="nav-text">java.util.concurrent.Semaphore</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#构造函数"><span class="nav-number">1.1.</span> <span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#公平锁和非公平锁的父类-Sync"><span class="nav-number">1.2.</span> <span class="nav-text">公平锁和非公平锁的父类 - Sync</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#公平共享锁"><span class="nav-number">1.3.</span> <span class="nav-text">公平共享锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#非公平共享锁"><span class="nav-number">1.4.</span> <span class="nav-text">非公平共享锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取许可"><span class="nav-number">1.5.</span> <span class="nav-text">获取许可</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不响应中断也不超时"><span class="nav-number">1.5.1.</span> <span class="nav-text">不响应中断也不超时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#响应中断"><span class="nav-number">1.5.2.</span> <span class="nav-text">响应中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#响应超时和中断"><span class="nav-number">1.5.3.</span> <span class="nav-text">响应超时和中断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#释放许可"><span class="nav-number">1.6.</span> <span class="nav-text">释放许可</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#监控"><span class="nav-number">1.7.</span> <span class="nav-text">监控</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取当前可用的许可"><span class="nav-number">1.7.0.1.</span> <span class="nav-text">获取当前可用的许可</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取并返回当前可用的所有许可"><span class="nav-number">1.7.0.2.</span> <span class="nav-text">获取并返回当前可用的所有许可</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#判断当前信号量是否是公平策略"><span class="nav-number">1.7.0.3.</span> <span class="nav-text">判断当前信号量是否是公平策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#判断是否存在线程在等待次信号量"><span class="nav-number">1.7.0.4.</span> <span class="nav-text">判断是否存在线程在等待次信号量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取等待资源的线程数"><span class="nav-number">1.7.0.5.</span> <span class="nav-text">获取等待资源的线程数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#toString-NaN"><span class="nav-number">1.7.0.6.</span> <span class="nav-text">toString</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AQS共享锁实现和独占锁实现的区别"><span class="nav-number">1.8.</span> <span class="nav-text">AQS共享锁实现和独占锁实现的区别</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">哩厘理濿</span><br>
+<img alt="知识共享许可协议" style="border-width:0;display:inline" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png">
+本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+  
+
+  
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/mynote/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/mynote/js/utils.js?v=7.1.0"></script>
+
+  <script src="/mynote/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/mynote/js/schemes/muse.js?v=7.1.0"></script>
+
+
+
+
+  
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/mynote/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
