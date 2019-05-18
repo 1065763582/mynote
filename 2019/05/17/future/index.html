@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/mynote/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/mynote/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/mynote/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/mynote/images/favicon-32x32-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/mynote/images/favicon-16x16-next.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/mynote/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/mynote/',
+    scheme: 'Mist',
+    version: '7.1.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Thread类的线程执行完成后需要通过共享变量配合线程通信来获取执行结果，Future 与 Callable是为了简化此过程。Future代表了线程执行的结果，Callable代表了一个存在返回值的Thread。同样的Thread不允许重复执行，他们的实现类FutureTask也被设计为不可重复执行的任务，但是可以重复获取执行结果。 java.util.concurrent.FutureJDK注释">
+<meta name="keywords" content="java,juc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Future 与 Callable">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/05/17/future/index.html">
+<meta property="og:site_name" content="Note">
+<meta property="og:description" content="Thread类的线程执行完成后需要通过共享变量配合线程通信来获取执行结果，Future 与 Callable是为了简化此过程。Future代表了线程执行的结果，Callable代表了一个存在返回值的Thread。同样的Thread不允许重复执行，他们的实现类FutureTask也被设计为不可重复执行的任务，但是可以重复获取执行结果。 java.util.concurrent.FutureJDK注释">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://s2.ax1x.com/2019/05/17/ELfBf1.png">
+<meta property="og:updated_time" content="2019-05-18T10:43:52.427Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Future 与 Callable">
+<meta name="twitter:description" content="Thread类的线程执行完成后需要通过共享变量配合线程通信来获取执行结果，Future 与 Callable是为了简化此过程。Future代表了线程执行的结果，Callable代表了一个存在返回值的Thread。同样的Thread不允许重复执行，他们的实现类FutureTask也被设计为不可重复执行的任务，但是可以重复获取执行结果。 java.util.concurrent.FutureJDK注释">
+<meta name="twitter:image" content="https://s2.ax1x.com/2019/05/17/ELfBf1.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/05/17/future/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Future 与 Callable | Note</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/mynote/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/05/17/future/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Future 与 Callable
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-17 21:18:28" itemprop="dateCreated datePublished" datetime="2019-05-17T21:18:28+08:00">2019-05-17</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-18 18:43:52" itemprop="dateModified" datetime="2019-05-18T18:43:52+08:00">2019-05-18</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Thread类的线程执行完成后需要通过共享变量配合线程通信来获取执行结果，Future 与 Callable是为了简化此过程。Future代表了线程执行的结果，Callable代表了一个存在返回值的Thread。同样的Thread不允许重复执行，他们的实现类FutureTask也被设计为不可重复执行的任务，但是可以重复获取执行结果。</p>
+<h1 id="java-util-concurrent-Future"><a href="#java-util-concurrent-Future" class="headerlink" title="java.util.concurrent.Future"></a>java.util.concurrent.Future</h1><p>JDK注释：Future表示异步计算的结果。 提供一系列方法检查线程是否完成，阻塞直到完成，以及获取计算结果。 只有在计算完成时才能使用方法get获取结果，必要时阻塞直到线程完成，取消方法可以取消线程。另外提供了其他方法来确定任务是否正常完成或被取消。 线程完成后，无法取消计算。如果希望使用Future但不提供可用的结果，则可以声明Future&lt;?&gt;形式的类型，结果返回null。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Future</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 尝试取消执行此任务。 如果任务已完成，已取消或由于某些其他原因无法取消，则此尝试将失败。 </span></span><br><span class="line"><span class="comment">     * 如果成功，并且在调用cancel时此任务尚未启动，则此任务永远不会运行。 </span></span><br><span class="line"><span class="comment">     * 如果任务已经启动，则mayInterruptIfRunning参数确定执行此任务的线程是否应该在尝试停止任务时被中断。</span></span><br><span class="line"><span class="comment">     * 此方法返回后，对isDone的后续调用将始终返回true。 如果此方法返回true，则对isCancelled的后续调用将始终返回true。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> mayInterruptIfRunning </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 如果任务不能被取消，返回false</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果线程在完成之前被取消，返回True</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isCancelled</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果线程完成，返回True</span></span><br><span class="line"><span class="comment">     * 完成可能是由于正常终止，异常或取消 - 在所有这些情况下，此方法将返回true。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isDone</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 阻塞线程，直到计算完成</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 计算结果</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> CancellationException 如果线程被取消  抛CancellationException</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> ExecutionException 如果计算过程出现异常 抛ExecutionException</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> InterruptedException 如果线程在等待期间被中断 抛InterruptedException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 阻塞线程，在超时范围内，计算完成。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> timeout 超时参数</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> unit 超时参数的时间单位</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 计算的结果</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> CancellationException 如果线程被取消  抛CancellationException</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> ExecutionException 如果计算过程出现异常 抛ExecutionException</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> InterruptedException 如果线程在等待期间被中断 抛InterruptedException</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> TimeoutException 如果线程在指定时间内没有返回结果 抛TimeoutException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> InterruptedException, ExecutionException, TimeoutException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="java-util-concurrent-Callable"><a href="#java-util-concurrent-Callable" class="headerlink" title="java.util.concurrent.Callable"></a>java.util.concurrent.Callable</h1><p>JDK注释：Callable任务返回结果并可能抛出异常。 实现者定义一个没有参数的call方法。<br>Callable接口类似于Runnable，因为它们的实例都有可能被另一个线程执行。 但是，Runnable不会返回结果，也不会抛出已检查的异常。<br>Executors类包含用于将Thread转换为Callable类的实用的程序方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 计算结果，如果无法执行则抛出异常。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">V <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="Future-与-Callable-结合"><a href="#Future-与-Callable-结合" class="headerlink" title="Future 与 Callable 结合"></a>Future 与 Callable 结合</h1><p><img src="https://s2.ax1x.com/2019/05/17/ELfBf1.png" alt="Future 与 Callable 结合类图"></p>
+<h1 id="java-util-concurrent-FutureTask"><a href="#java-util-concurrent-FutureTask" class="headerlink" title="java.util.concurrent.FutureTask"></a>java.util.concurrent.FutureTask</h1><p>FutureTask因为实现了Runable接口，所以可能在其他线程跑起来。然后在run方法中调用callable。并在类内部持有一个泛型变量用于接收callable的返回值，使用状态来表示当前计算处于的截断。</p>
+<p>JDK注释：可取消的异步计算。此类提供Future的基本实现，包括启动和取消计算的方法，查询计算是否完成，以及获取计算结果。只有在计算完成后才能获取结果;如果计算尚未完成，get方法将阻塞。 计算完成后，无法重新启动或取消计算（除非调用runAndReset）。<br>FutureTask可用于包装Callable或Runnable对象。 因为FutureTask实现了Runnable，所以可以将FutureTask提交给Executor执行。<br>除了作为独立类之外，此类还提供了在创建自定义任务类时可能有用的protect方法。</p>
+<h2 id="Field"><a href="#Field" class="headerlink" title="Field"></a>Field</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 此任务的运行状态，最初为NEW。 运行状态仅在方法set，setException和cancel中转换为终端状态。 </span></span><br><span class="line"><span class="comment"> * 在完成期间，状态可以采用COMPLETING的瞬态值（在设置结果时）或INTERRUPTING（仅在中断转轮以满足取消（true）时）。 </span></span><br><span class="line"><span class="comment"> * 从这些中间状态到最终状态的转换使用有序并且惰性的写入，因为值是唯一的并且不能进一步修改。</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 可能的状态转换：</span></span><br><span class="line"><span class="comment"> * NEW -&gt; COMPLETING -&gt; NORMAL        线程正常结束</span></span><br><span class="line"><span class="comment"> * NEW -&gt; COMPLETING -&gt; EXCEPTIONAL   线程异常结束</span></span><br><span class="line"><span class="comment"> * NEW -&gt; CANCELLED                   线程被取消，不需要产生中断信号</span></span><br><span class="line"><span class="comment"> * NEW -&gt; INTERRUPTING -&gt; INTERRUPTED 线程被取消，并且产生一个中断信号</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 完成状态包括：正常（NORMAL）， 异常（EXCEPTIONAL）， 被取消（CANCELLED）， 被中断（INTERRUPTED）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">int</span> state;  <span class="comment">// volatile保证state的可见性</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> NEW          = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> COMPLETING   = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> NORMAL       = <span class="number">2</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> EXCEPTIONAL  = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CANCELLED    = <span class="number">4</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INTERRUPTING = <span class="number">5</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INTERRUPTED  = <span class="number">6</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 基于Callable，允许完成后废除 */</span></span><br><span class="line"><span class="keyword">private</span> Callable&lt;V&gt; callable;</span><br><span class="line"><span class="comment">/** 从get()方法中获取到的结果或抛出的异常 */</span></span><br><span class="line"><span class="keyword">private</span> Object outcome; <span class="comment">// non-volatile, protected by state reads/writes</span></span><br><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * 记录Callable的线程, </span></span><br><span class="line"><span class="comment"> * 可以理解为callable的计算是在runner线程上跑的</span></span><br><span class="line"><span class="comment"> * 使用CAS更新 </span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> Thread runner;</span><br><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * Treiber Stack Algorithm是一个可扩展的无锁栈，利用细粒度的并发原语CAS来实现的</span></span><br><span class="line"><span class="comment"> * waiters表示等待线程的Treiber Stack</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> WaitNode waiters;</span><br></pre></td></tr></table></figure>
+<h2 id="Constructor"><a href="#Constructor" class="headerlink" title="Constructor"></a>Constructor</h2><p>从两个构造函数可以看出，FuturTask的初始状态为NEW<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用callable实例化一个Future，很单纯的实现</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FutureTask</span><span class="params">(Callable&lt;V&gt; callable)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (callable == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">this</span>.callable = callable;</span><br><span class="line">    <span class="keyword">this</span>.state = NEW;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用runable和返回值实例化一个Future</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FutureTask</span><span class="params">(Runnable runnable, V result)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 使用工具方法Executors.callable，将Runbale转为Callable</span></span><br><span class="line">    <span class="keyword">this</span>.callable = Executors.callable(runnable, result);</span><br><span class="line">    <span class="keyword">this</span>.state = NEW;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="run"><a href="#run" class="headerlink" title="run"></a>run</h2><p>首先得使线程跑起来，run方法重写了Runable的run<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 1. 初始状态不为NEW</span></span><br><span class="line">    <span class="comment">// 2. CAS更新runner失败</span></span><br><span class="line">    <span class="comment">// 两者发生其一都能说明当前FutureTask已经开始执行或者被取消</span></span><br><span class="line">    <span class="comment">// 避免重复执行，所有直接return</span></span><br><span class="line">    <span class="comment">// Q：什么情况下 state == NEW 但是CAS会失败？</span></span><br><span class="line">    <span class="comment">// A：有其他线程先获取了CPU时间，抢先一步执行了，注意FutureTask是不能重复执行的</span></span><br><span class="line">    <span class="keyword">if</span> (state != NEW ||</span><br><span class="line">        !UNSAFE.compareAndSwapObject(<span class="keyword">this</span>, runnerOffset,</span><br><span class="line">                                     <span class="keyword">null</span>, Thread.currentThread()))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Callable&lt;V&gt; c = callable;</span><br><span class="line">        <span class="comment">// 什么情况下 c == null 但是 state == NEW ？</span></span><br><span class="line">        <span class="comment">// 构造器内，先对callable赋值，再对state赋值，state被volatile标识，重排序是不可能发生的，因此实例化然后执行不会出现此情况</span></span><br><span class="line">        <span class="comment">// 估计只是一个单纯的验证</span></span><br><span class="line">        <span class="keyword">if</span> (c != <span class="keyword">null</span> &amp;&amp; state == NEW) &#123;</span><br><span class="line">            V result;</span><br><span class="line">            <span class="keyword">boolean</span> ran;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 获取callbale的结果</span></span><br><span class="line">                result = c.call();</span><br><span class="line">                <span class="comment">// 标识 顺利完成计算</span></span><br><span class="line">                ran = <span class="keyword">true</span>;</span><br><span class="line">                <span class="comment">// 由此可以看出，在计算完成前，FutureTask的state为NEW</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">                <span class="comment">// 出现异常，结果置null</span></span><br><span class="line">                result = <span class="keyword">null</span>;</span><br><span class="line">                ran = <span class="keyword">false</span>;</span><br><span class="line">                <span class="comment">// 异常处理</span></span><br><span class="line">                setException(ex);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 如果计算顺利完成，设置结果</span></span><br><span class="line">            <span class="keyword">if</span> (ran)</span><br><span class="line">                set(result);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">// 状态为完成状态之前，线程runner不能为空，是为了防止并发的调用run方法</span></span><br><span class="line">        runner = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">// runner置空后，必须重新获取state，防止遗漏中断信号</span></span><br><span class="line">        <span class="keyword">int</span> s = state;</span><br><span class="line">        <span class="comment">// 若线程因为取消操作被中断，则让出CPU执行时间，让取消操作执行完</span></span><br><span class="line">        <span class="keyword">if</span> (s &gt;= INTERRUPTING)</span><br><span class="line">            handlePossibleCancellationInterrupt(s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="计算正常结束-set"><a href="#计算正常结束-set" class="headerlink" title="计算正常结束 - set"></a>计算正常结束 - set</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将此future的结果设置为给定值，除非已设置或已取消此FutureTask。</span></span><br><span class="line"><span class="comment"> * 成功完成计算后，run方法在内部调用此方法。</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> v 计算完成的值</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(V v)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// CAS更新state  NEW -&gt; COMPLETING</span></span><br><span class="line">    <span class="comment">// 若CAS失败，说明在计算线程完成前被其他线程抢先完成或取消了</span></span><br><span class="line">    <span class="keyword">if</span> (UNSAFE.compareAndSwapInt(<span class="keyword">this</span>, stateOffset, NEW, COMPLETING)) &#123;</span><br><span class="line">        <span class="comment">// 将计算结果存储到FutureTask的outcome属性</span></span><br><span class="line">        outcome = v;</span><br><span class="line">        <span class="comment">// 当state更新为COMPLETING时，说明计算已经结束，Future已成功获取到了计算结果</span></span><br><span class="line">        <span class="comment">// 此时，可以直接将state置为最终态  COMPLETING -&gt; NORMAL</span></span><br><span class="line">        UNSAFE.putOrderedInt(<span class="keyword">this</span>, stateOffset, NORMAL);</span><br><span class="line">        <span class="comment">// 结束计算</span></span><br><span class="line">        finishCompletion();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="计算异常结束-setException"><a href="#计算异常结束-setException" class="headerlink" title="计算异常结束 - setException"></a>计算异常结束 - setException</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 此方法会导致Future计算结果抛出异常，异常原因是t</span></span><br><span class="line"><span class="comment"> * 在计算失败时，run方法在内部调用此方法。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">setException</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 发生异常也是计算完成，只是完成的结果是失败。</span></span><br><span class="line">    <span class="comment">// 因此 需要将state更新： NEW -&gt; COMPLETING</span></span><br><span class="line">    <span class="keyword">if</span> (UNSAFE.compareAndSwapInt(<span class="keyword">this</span>, stateOffset, NEW, COMPLETING)) &#123;</span><br><span class="line">        <span class="comment">// 将计算结果存储到FutureTask的outcome属性</span></span><br><span class="line">        outcome = t;</span><br><span class="line">        <span class="comment">// 获取到了计算结果，将此Future的state更新为最终态  COMPLETING -&gt; EXCEPTIONAL</span></span><br><span class="line">        UNSAFE.putOrderedInt(<span class="keyword">this</span>, stateOffset, EXCEPTIONAL);</span><br><span class="line">        <span class="comment">// 结束计算</span></span><br><span class="line">        finishCompletion();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="结束计算的清理工作-finishCompletion"><a href="#结束计算的清理工作-finishCompletion" class="headerlink" title="结束计算的清理工作 - finishCompletion"></a>结束计算的清理工作 - finishCompletion</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 移除并通知所有等待的线程，</span></span><br><span class="line"><span class="comment"> * 然后调用done(),</span></span><br><span class="line"><span class="comment"> * 最后将callable置空</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">finishCompletion</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 若此计算存在其他等待计算的线程，开始清理线程</span></span><br><span class="line">    <span class="comment">// Q：为什么使用循环？ for有初始值，有终止条件，但是步长是什么？</span></span><br><span class="line">    <span class="comment">// A：当CAS更新waiters失败时，会再次判断q。这里循环是为了保证CAS更新waiters一定成功</span></span><br><span class="line">    <span class="keyword">for</span> (WaitNode q; (q = waiters) != <span class="keyword">null</span>;) &#123;</span><br><span class="line">        <span class="comment">// 使用q指向当前的线程节点</span></span><br><span class="line">        <span class="comment">// 然后将Future的waiters置空，允许失败</span></span><br><span class="line">        <span class="comment">// Q：在什么情况下更新waiters失败？</span></span><br><span class="line">        <span class="comment">// A：当有其他线程A调用get时，会把线程A入栈，并将waiters指向线程A的节点</span></span><br><span class="line">        <span class="keyword">if</span> (UNSAFE.compareAndSwapObject(<span class="keyword">this</span>, waitersOffset, q, <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="comment">// 取出节点代表的线程</span></span><br><span class="line">                Thread t = q.thread;</span><br><span class="line">                <span class="keyword">if</span> (t != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// 清空thread属性，帮助GC</span></span><br><span class="line">                    q.thread = <span class="keyword">null</span>;</span><br><span class="line">                    <span class="comment">// 唤醒节点线程</span></span><br><span class="line">                    <span class="comment">// 当此线程开始执行run时，此Future的state状态一定不为NEW，因此会直接return</span></span><br><span class="line">                    LockSupport.unpark(t);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// </span></span><br><span class="line">                WaitNode next = q.next;</span><br><span class="line">                <span class="comment">// 空，表示已经到链表尾，可以结束清理工作了</span></span><br><span class="line">                <span class="keyword">if</span> (next == <span class="keyword">null</span>)</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="comment">// 置空是为了帮助GC</span></span><br><span class="line">                q.next = <span class="keyword">null</span>; </span><br><span class="line">                <span class="comment">// 继续唤醒下一个节点</span></span><br><span class="line">                q = next;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 留给子类重写</span></span><br><span class="line">    done();</span><br><span class="line">    callable = <span class="keyword">null</span>;        <span class="comment">// to reduce footprint 减少内存占用</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="可扩展的方法-done"><a href="#可扩展的方法-done" class="headerlink" title="可扩展的方法 - done"></a>可扩展的方法 - done</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 无论计算正常完成，异常完成还是取消计算，都会执行此方法，</span></span><br><span class="line"><span class="comment"> * 默认实现什么都不做。 子类可以重写此方法以调用完成回调或结果记录</span></span><br><span class="line"><span class="comment"> * 注意，可以在此方法的实现中查询状态，以确定是否已取消此任务。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">done</span><span class="params">()</span> </span>&#123; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="正常结束，异常结束以及重置的善后处理"><a href="#正常结束，异常结束以及重置的善后处理" class="headerlink" title="正常结束，异常结束以及重置的善后处理"></a>正常结束，异常结束以及重置的善后处理</h4><p>处理方式是，若因为取消而发生中断，那么就等待取消操作的完成<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 只有在线程被中断时调用。</span></span><br><span class="line"><span class="comment"> * 确保中断信号在run或runAndReset中传递。</span></span><br><span class="line"><span class="comment"> * 若结束后发生了中断，则等待中断处理完成</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handlePossibleCancellationInterrupt</span><span class="params">(<span class="keyword">int</span> s)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 如果因为取消操作而被中断</span></span><br><span class="line">    <span class="keyword">if</span> (s == INTERRUPTING)</span><br><span class="line">        <span class="comment">// 等待取消操作的完成</span></span><br><span class="line">        <span class="keyword">while</span> (state == INTERRUPTING)</span><br><span class="line">            Thread.yield(); <span class="comment">// wait out pending interrupt</span></span><br><span class="line">    <span class="comment">// assert state == INTERRUPTED;</span></span><br><span class="line">    <span class="comment">// 我们希望清除我们从取消中收到的任何中断（true）。 </span></span><br><span class="line">    <span class="comment">// 但是，允许使用中断作为任务与其调用者通信的独立机制，并且无法仅清除取消中断。</span></span><br><span class="line">    <span class="comment">// Thread.interrupted();</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="取消-cancel"><a href="#取消-cancel" class="headerlink" title="取消 - cancel"></a>取消 - cancel</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 取消线程，只能取消NEW状态的消除</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> mayInterruptIfRunning true 表示正在运行的任务需要产生一个中断信号</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> true&#125; 表示线程被取消，false表示线程无法被取消</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 当前计算任务的状态为NEW，并且成功更新为INTERRUPTING或者CANCELLED</span></span><br><span class="line">    <span class="keyword">if</span> (!(state == NEW &amp;&amp;</span><br><span class="line">          UNSAFE.compareAndSwapInt(<span class="keyword">this</span>, stateOffset, NEW,</span><br><span class="line">              mayInterruptIfRunning ? INTERRUPTING : CANCELLED)))</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;   </span><br><span class="line">        <span class="keyword">if</span> (mayInterruptIfRunning) &#123;</span><br><span class="line">            <span class="comment">// INTERRUPTING 表示正在中断</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 标识callable线程的中断标志位</span></span><br><span class="line">                Thread t = runner;</span><br><span class="line">                <span class="keyword">if</span> (t != <span class="keyword">null</span>)</span><br><span class="line">                    t.interrupt();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="comment">// 更新state： INTERRUPTING -&gt; INTERRUPTED</span></span><br><span class="line">                UNSAFE.putOrderedInt(<span class="keyword">this</span>, stateOffset, INTERRUPTED);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">// 移除并通知所有等待的线程</span></span><br><span class="line">        finishCompletion();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// true：线程已被取消</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="获取结果-get"><a href="#获取结果-get" class="headerlink" title="获取结果 - get"></a>获取结果 - get</h2><h4 id="阻塞，直到获取到结果"><a href="#阻塞，直到获取到结果" class="headerlink" title="阻塞，直到获取到结果"></a>阻塞，直到获取到结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Future接口的实现</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException </span>&#123;</span><br><span class="line">    <span class="comment">// 获取当前的状态</span></span><br><span class="line">    <span class="keyword">int</span> s = state;</span><br><span class="line">    <span class="comment">// 如果没有结束，就等到结束获取结果</span></span><br><span class="line">    <span class="keyword">if</span> (s &lt;= COMPLETING)</span><br><span class="line">        s = awaitDone(<span class="keyword">false</span>, <span class="number">0L</span>);</span><br><span class="line">    <span class="comment">// 返回结果或者抛出异常</span></span><br><span class="line">    <span class="keyword">return</span> report(s);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 任务完成后，返回结果或者抛出异常</span></span><br><span class="line"><span class="comment"> * 根据当前状态决定</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> s 完成状态</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line"><span class="function"><span class="keyword">private</span> V <span class="title">report</span><span class="params">(<span class="keyword">int</span> s)</span> <span class="keyword">throws</span> ExecutionException </span>&#123;</span><br><span class="line">    <span class="comment">// 临时变量保存outcome</span></span><br><span class="line">    <span class="comment">// NOTE：看了几个JUC的类，发现若要使用没有做线程安全的共享变量，首先就是保存到方法栈的局部变量里再使用</span></span><br><span class="line">    <span class="comment">// NOTE：若这个变量对结果有影响，则加锁或者CAS更新</span></span><br><span class="line">    Object x = outcome;</span><br><span class="line">    <span class="comment">// 如果正常完成，则返回计算结果</span></span><br><span class="line">    <span class="keyword">if</span> (s == NORMAL)</span><br><span class="line">        <span class="keyword">return</span> (V)x;</span><br><span class="line">    <span class="comment">// 取消或者中断，抛出CancellationException异常</span></span><br><span class="line">    <span class="keyword">if</span> (s &gt;= CANCELLED)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> CancellationException();</span><br><span class="line">    <span class="comment">// 完成状态为EXCEPTIONAL 抛出ExecutionException异常</span></span><br><span class="line">    <span class="comment">// 表示计算过程出现了异常</span></span><br><span class="line">    <span class="comment">// 异常结果和正常结果都保存在outcome中，因此outcome是一个Object类型而不是泛型V</span></span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ExecutionException((Throwable)x);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="超时阻塞，直到获取结果"><a href="#超时阻塞，直到获取结果" class="headerlink" title="超时阻塞，直到获取结果"></a>超时阻塞，直到获取结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> InterruptedException, ExecutionException, TimeoutException </span>&#123;</span><br><span class="line">    <span class="comment">// 参数校验</span></span><br><span class="line">    <span class="keyword">if</span> (unit == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">int</span> s = state;</span><br><span class="line">    <span class="comment">// 若没有完成，等待直到完成或者超时</span></span><br><span class="line">    <span class="keyword">if</span> (s &lt;= COMPLETING &amp;&amp;</span><br><span class="line">        (s = awaitDone(<span class="keyword">true</span>, unit.toNanos(timeout))) &lt;= COMPLETING)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> TimeoutException();</span><br><span class="line">    <span class="comment">// 返回结果或者抛出异常</span></span><br><span class="line">    <span class="keyword">return</span> report(s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="等待结果-awaitDone"><a href="#等待结果-awaitDone" class="headerlink" title="等待结果 - awaitDone"></a>等待结果 - awaitDone</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 等待线程完成，或者被中断，或者超时</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> timed 是否需要超时</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> nanos 等待时间  纳秒</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 完成状态</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">awaitDone</span><span class="params">(<span class="keyword">boolean</span> timed, <span class="keyword">long</span> nanos)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// 需要超时，则计算截止时间</span></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span> deadline = timed ? System.nanoTime() + nanos : <span class="number">0L</span>;</span><br><span class="line">    <span class="comment">// 等待队列</span></span><br><span class="line">    WaitNode q = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">boolean</span> queued = <span class="keyword">false</span>;</span><br><span class="line">    <span class="comment">// 自旋</span></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">// 如果线程被中断，抛出异常</span></span><br><span class="line">        <span class="keyword">if</span> (Thread.interrupted()) &#123;</span><br><span class="line">            <span class="comment">// 移除节点q</span></span><br><span class="line">            removeWaiter(q);</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 若当前计算任务完成，则返回完成状态</span></span><br><span class="line">        <span class="keyword">int</span> s = state;</span><br><span class="line">        <span class="keyword">if</span> (s &gt; COMPLETING) &#123;</span><br><span class="line">            <span class="keyword">if</span> (q != <span class="keyword">null</span>)</span><br><span class="line">                q.thread = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">return</span> s;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 若当前线程处于正在完成的过程中，调用yield让出CPU时间，等待下次循环</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (s == COMPLETING) <span class="comment">// cannot time out yet</span></span><br><span class="line">            Thread.yield();</span><br><span class="line">        <span class="comment">// 若状态还是NEW， 则实例化一个节点，表示存在一个线程在等待计算结果</span></span><br><span class="line">        <span class="comment">// 第一次循环线程未完成，get就进入此判断，实例化q后，进入下一次循环再次判断状态是否完成</span></span><br><span class="line">        <span class="comment">// 若依然未完成，进入下一个条件判断</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (q == <span class="keyword">null</span>)</span><br><span class="line">            <span class="comment">// waitNode保存了当前线程的引用</span></span><br><span class="line">            q = <span class="keyword">new</span> WaitNode();</span><br><span class="line">        <span class="comment">// 第二次循环线程依然未完成，则会进入到此条件</span></span><br><span class="line">        <span class="comment">// 将当前到等待获取结果的线程加入Future实例的Treiber栈里</span></span><br><span class="line">        <span class="comment">// 既然是栈，那么在唤醒时是按照先进后出的顺序</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!queued)</span><br><span class="line">            <span class="comment">// 当前线程的waiter的next指向已存在的线程栈，然后将waitersCAS更新为最后一个线程的waiter</span></span><br><span class="line">            <span class="comment">// waiter是链表结构，Future内的waiters始终指向链表的最后一个节点</span></span><br><span class="line">            <span class="comment">// 然后进入第三次循环</span></span><br><span class="line">            queued = UNSAFE.compareAndSwapObject(<span class="keyword">this</span>, waitersOffset,</span><br><span class="line">                                                 q.next = waiters, q);</span><br><span class="line">        <span class="comment">// 第三次循环，判断参数，是否需要超时</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (timed) &#123;</span><br><span class="line">            <span class="comment">// 计算下，当前是否超时。判断截止时间是否超过当前时间</span></span><br><span class="line">            nanos = deadline - System.nanoTime();</span><br><span class="line">            <span class="comment">// 若超时了移除节点，返回状态</span></span><br><span class="line">            <span class="keyword">if</span> (nanos &lt;= <span class="number">0L</span>) &#123;</span><br><span class="line">                removeWaiter(q);</span><br><span class="line">                <span class="keyword">return</span> state;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 没超时，则超时阻塞当前线程</span></span><br><span class="line">            LockSupport.parkNanos(<span class="keyword">this</span>, nanos);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// 第三次循环若不需要超时，直接阻塞当前线程</span></span><br><span class="line">            <span class="comment">// 阻塞了什么时候唤醒的？</span></span><br><span class="line">            LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 尝试取消链接超时或中断的等待节点以避免累积垃圾。</span></span><br><span class="line"><span class="comment"> * 此方法在awaitDone调用，node可能为空，或者node == waiters</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">removeWaiter</span><span class="params">(WaitNode node)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 当前节点不为空</span></span><br><span class="line">    <span class="keyword">if</span> (node != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 将线程置空，同时这也是被取消节点的标识。</span></span><br><span class="line">        <span class="comment">// 若一个节点的thread为空，表示此节点已经被取消</span></span><br><span class="line">        node.thread = <span class="keyword">null</span>;</span><br><span class="line">        retry:</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;          <span class="comment">// restart on removeWaiter race  重新执行移除节点</span></span><br><span class="line">            <span class="keyword">for</span> (WaitNode pred = <span class="keyword">null</span>, q = waiters, s; q != <span class="keyword">null</span>; q = s) &#123;</span><br><span class="line">                <span class="comment">// 最后表示的一定是被取消节点的下一个节点</span></span><br><span class="line">                s = q.next;</span><br><span class="line">                <span class="comment">// Q：q的线程在什么时候不为空？</span></span><br><span class="line">                <span class="comment">// A：正常情况下是为空的，因为q = waiters = node。</span></span><br><span class="line">                <span class="comment">//    当有新的线程来等待计算结果时，CAS会失败，进入第二次最外层的循环</span></span><br><span class="line">                <span class="comment">//    此时q = waiters != node，q是新的栈顶，主要新的栈顶waiter没被取消，q.thread != null一定成立</span></span><br><span class="line">                <span class="keyword">if</span> (q.thread != <span class="keyword">null</span>)</span><br><span class="line">                    <span class="comment">// 因为栈只有向后的索引next，没有向前的索引，因此每次循环需要把前一个栈节点记录下来</span></span><br><span class="line">                    <span class="comment">// 然后进入下一次的内层循环，直到找到这个取消的节点。</span></span><br><span class="line">                    pred = q;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (pred != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// 若找到了这个被取消的节点，就把这个被取消节点的前一个节点的next指向s</span></span><br><span class="line">                    <span class="comment">// 此时节点从栈的集合中取出，节点取消成功</span></span><br><span class="line">                    pred.next = s;</span><br><span class="line">                    <span class="comment">// 继续判断前一个节点是否已经被取消</span></span><br><span class="line">                    <span class="comment">// 若被取消则需要重新取出栈顶元素再次循环判断取消节点</span></span><br><span class="line">                    <span class="comment">// 若没有被取消，则继续判断下一个节点，这将遍历完整个栈，将被取消的节点剔除</span></span><br><span class="line">                    <span class="keyword">if</span> (pred.thread == <span class="keyword">null</span>) <span class="comment">// check for race</span></span><br><span class="line">                        <span class="keyword">continue</span> retry;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 在没有并发和竞争的情况下，会直接到此条件，将q的下一个节点更新为栈顶waiters</span></span><br><span class="line">                <span class="comment">// 更新成功，表示node已经出栈</span></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (!UNSAFE.compareAndSwapObject(<span class="keyword">this</span>, waitersOffset,</span><br><span class="line">                                                      q, s))</span><br><span class="line">                    <span class="comment">// 若更新失败，说明栈变化了，此时需要重新取出栈顶再次循环判断取消节点</span></span><br><span class="line">                    <span class="keyword">continue</span> retry;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="状态的获取"><a href="#状态的获取" class="headerlink" title="状态的获取"></a>状态的获取</h2><h4 id="是否完成"><a href="#是否完成" class="headerlink" title="是否完成"></a>是否完成</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 若状态不为new就表示完成，完成状态存在多种</span></span><br><span class="line"><span class="comment">// 为什么状态不为new就是完成？</span></span><br><span class="line"><span class="comment">// 由run方法的执行过程决定的</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isDone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> state != NEW;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="是否被取消"><a href="#是否被取消" class="headerlink" title="是否被取消"></a>是否被取消</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 状态大于CANCELLED，表示取消。意味着中断，此方法也会返回true</span></span><br><span class="line"><span class="comment">// 需要注意， state只会变大，不会变小</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isCancelled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> state &gt;= CANCELLED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Future的重复利用"><a href="#Future的重复利用" class="headerlink" title="Future的重复利用"></a>Future的重复利用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 执行计算而不设置其结果，然后将此FutureTask重置为初始状态，</span></span><br><span class="line"><span class="comment"> * 也就是说重复执行后，结果依然是第一次执行的结果，除非执行异常了</span></span><br><span class="line"><span class="comment"> * 如果计算遇到异常或被取消则无法执行此操作。</span></span><br><span class="line"><span class="comment"> * 这适用于本质上执行多次的任务。</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> true&#125; 重置成功</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">runAndReset</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 如果state == NEW，表示正在执行计算，不能重置</span></span><br><span class="line">    <span class="comment">// 如果runnerOffset !=  null 表示正在执行计算，不能重置</span></span><br><span class="line">    <span class="keyword">if</span> (state != NEW ||</span><br><span class="line">        !UNSAFE.compareAndSwapObject(<span class="keyword">this</span>, runnerOffset,</span><br><span class="line">                                     <span class="keyword">null</span>, Thread.currentThread()))</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="comment">// 是否已经开始执行重置后的任务</span></span><br><span class="line">    <span class="keyword">boolean</span> ran = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">int</span> s = state;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Callable&lt;V&gt; c = callable;</span><br><span class="line">        <span class="keyword">if</span> (c != <span class="keyword">null</span> &amp;&amp; s == NEW) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                c.call(); <span class="comment">// 不设置返回值</span></span><br><span class="line">                ran = <span class="keyword">true</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">                <span class="comment">// 如果出现异常，则需要设置状态为异常</span></span><br><span class="line">                setException(ex);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">// 状态为完成状态之前，线程runner不能为空，是为了防止并发的调用run方法</span></span><br><span class="line">        runner = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">// runner置空后需要重新读取state状态，防止遗漏线程中断</span></span><br><span class="line">        s = state;</span><br><span class="line">        <span class="keyword">if</span> (s &gt;= INTERRUPTING)</span><br><span class="line">            handlePossibleCancellationInterrupt(s);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ran &amp;&amp; s == NEW;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Q：如何使用此方法？<br>A：此方法是protected，因此只有子类使用。从源码可以看出使用此方法到前提条件是state == NEW并且runner == null。因此需要重写FutureTask的run方法，在run方法中调用runAndReset。使用方式可以参考ScheduledThreadPoolExecutor.run</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/mynote/tags/java/" rel="tag"># java</a>
+          
+            <a href="/mynote/tags/juc/" rel="tag"># juc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/05/14/xpath/" rel="next" title="XPath">
+                <i class="fa fa-chevron-left"></i> XPath
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">哩厘理濿</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/mynote/archives/">
+                
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#java-util-concurrent-Future"><span class="nav-number">1.</span> <span class="nav-text">java.util.concurrent.Future</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#java-util-concurrent-Callable"><span class="nav-number">2.</span> <span class="nav-text">java.util.concurrent.Callable</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Future-与-Callable-结合"><span class="nav-number">3.</span> <span class="nav-text">Future 与 Callable 结合</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#java-util-concurrent-FutureTask"><span class="nav-number">4.</span> <span class="nav-text">java.util.concurrent.FutureTask</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Field"><span class="nav-number">4.1.</span> <span class="nav-text">Field</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Constructor"><span class="nav-number">4.2.</span> <span class="nav-text">Constructor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#run"><span class="nav-number">4.3.</span> <span class="nav-text">run</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#计算正常结束-set"><span class="nav-number">4.3.0.1.</span> <span class="nav-text">计算正常结束 - set</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算异常结束-setException"><span class="nav-number">4.3.0.2.</span> <span class="nav-text">计算异常结束 - setException</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结束计算的清理工作-finishCompletion"><span class="nav-number">4.3.0.3.</span> <span class="nav-text">结束计算的清理工作 - finishCompletion</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可扩展的方法-done"><span class="nav-number">4.3.0.4.</span> <span class="nav-text">可扩展的方法 - done</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#正常结束，异常结束以及重置的善后处理"><span class="nav-number">4.3.0.5.</span> <span class="nav-text">正常结束，异常结束以及重置的善后处理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#取消-cancel"><span class="nav-number">4.4.</span> <span class="nav-text">取消 - cancel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取结果-get"><span class="nav-number">4.5.</span> <span class="nav-text">获取结果 - get</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#阻塞，直到获取到结果"><span class="nav-number">4.5.0.1.</span> <span class="nav-text">阻塞，直到获取到结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超时阻塞，直到获取结果"><span class="nav-number">4.5.0.2.</span> <span class="nav-text">超时阻塞，直到获取结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#等待结果-awaitDone"><span class="nav-number">4.5.0.3.</span> <span class="nav-text">等待结果 - awaitDone</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#状态的获取"><span class="nav-number">4.6.</span> <span class="nav-text">状态的获取</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#是否完成"><span class="nav-number">4.6.0.1.</span> <span class="nav-text">是否完成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#是否被取消"><span class="nav-number">4.6.0.2.</span> <span class="nav-text">是否被取消</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Future的重复利用"><span class="nav-number">4.7.</span> <span class="nav-text">Future的重复利用</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">哩厘理濿</span><br>
+<img alt="知识共享许可协议" style="border-width:0;display:inline" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png">
+本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+  
+
+  
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/mynote/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/mynote/js/utils.js?v=7.1.0"></script>
+
+  <script src="/mynote/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/mynote/js/schemes/muse.js?v=7.1.0"></script>
+
+
+
+
+  
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/mynote/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
