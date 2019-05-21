@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/mynote/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/mynote/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/mynote/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/mynote/images/favicon-32x32-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/mynote/images/favicon-16x16-next.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/mynote/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/mynote/',
+    scheme: 'Mist',
+    version: '7.1.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="CompletionStageJDK注释：CompletionStage接口描述了异步计算可能经历的阶段，当其他阶段完成时具体表现为一个行为或者计算一个值。阶段在其计算终止时完成，但这又可以触发其他依赖阶段。阶段(Stage)在其计算终止时完成，但这又可以触发其他依赖阶段。 此接口中定义的功能仅使用几种基本形式，这些形式扩展为更大的方法集以捕获一系列使用方式：  一个阶段的计算可能表现为Funct">
+<meta name="keywords" content="java,juc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CompletionStage">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/05/19/completionStage/index.html">
+<meta property="og:site_name" content="Note">
+<meta property="og:description" content="CompletionStageJDK注释：CompletionStage接口描述了异步计算可能经历的阶段，当其他阶段完成时具体表现为一个行为或者计算一个值。阶段在其计算终止时完成，但这又可以触发其他依赖阶段。阶段(Stage)在其计算终止时完成，但这又可以触发其他依赖阶段。 此接口中定义的功能仅使用几种基本形式，这些形式扩展为更大的方法集以捕获一系列使用方式：  一个阶段的计算可能表现为Funct">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-05-21T14:43:54.067Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CompletionStage">
+<meta name="twitter:description" content="CompletionStageJDK注释：CompletionStage接口描述了异步计算可能经历的阶段，当其他阶段完成时具体表现为一个行为或者计算一个值。阶段在其计算终止时完成，但这又可以触发其他依赖阶段。阶段(Stage)在其计算终止时完成，但这又可以触发其他依赖阶段。 此接口中定义的功能仅使用几种基本形式，这些形式扩展为更大的方法集以捕获一系列使用方式：  一个阶段的计算可能表现为Funct">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/05/19/completionStage/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>CompletionStage | Note</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/mynote/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/05/19/completionStage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CompletionStage
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-19 15:03:26" itemprop="dateCreated datePublished" datetime="2019-05-19T15:03:26+08:00">2019-05-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-21 22:43:54" itemprop="dateModified" datetime="2019-05-21T22:43:54+08:00">2019-05-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="CompletionStage"><a href="#CompletionStage" class="headerlink" title="CompletionStage"></a>CompletionStage</h2><p>JDK注释：CompletionStage接口描述了异步计算可能经历的阶段，当其他阶段完成时具体表现为一个行为或者计算一个值。阶段在其计算终止时完成，但这又可以触发其他依赖阶段。阶段(Stage)在其计算终止时完成，但这又可以触发其他依赖阶段。 此接口中定义的功能仅使用几种基本形式，这些形式扩展为更大的方法集以捕获一系列使用方式：</p>
+<ul>
+<li>一个阶段的计算可能表现为Function，Consumer或Runnable，使用名称分别包括apply，accept或run的方法，具体使用哪一个取决于它是否需要参数和/或产生结果。例如<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stage.thenApply(x  - &gt; square(x)).thenAccept(x  - &gt; System.out.print(x)).thenRun(() - &gt; System.out.println());</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>这种写法描述了计算本身的阶段，而不是计算的结果。</p>
+<ul>
+<li>一个阶段的执行可以通过完成单个阶段或两个阶段或两个阶段中的任何一个来触发。使用前缀<strong>then</strong>的方法排列单个阶段的依赖关系。通过完成两个阶段去触发的那些计算，可以使用相应命名（<strong>combine</strong>）的方法组合它们的结果或效果。由两个阶段中的任何一个完成来触发的那些计算都不能保证哪个结果或效果用于依赖阶段的计算。</li>
+<li>各阶段之间的依赖关系控制计算的触发，但不保证任何特定的排序。 另外，新阶段计算的执行可以以三种方式中的任何一种来安排：默认执行，默认异步执行（使用具有后台异步的方法，使用阶段的默认异步执行工具）或自定义（通过提供的<strong>Executor</strong>）。默认和异步模式的执行实现由<strong>CompletionStage</strong>实现指定，而不是此接口，具有显式<strong>Executor</strong>参数的方法可能具有任意执行属性，甚至可能不支持并发执行，但是以适应异步的方式进行处理。</li>
+<li>两种方法形式支持处理触发阶段是正常还是异常完成：1.<strong>whenComplete</strong>-允许注入动作而不管结果如何2.<strong>handle</strong>-允许阶段计算替换结果，该替换结果可以使得能够通过其他依赖阶段进一步处理。在所有其他情况下，如果一个阶段的计算以（未经检查的）异常或错误突然终止，那么所有需要完成的依赖阶段也会异常完成，并且<strong>CompletionException</strong>将异常作为其原因。如果一个阶段依赖于两个阶段，并且两个阶段都完全异常，则<strong>CompletionException</strong>可能对应于这些异常中的任何一个。 如果一个阶段依赖于另外两个阶段中的任何一个阶段，并且只有一个阶段异常完成，则无法保证依赖阶段是正常完成还是异常完成。 如果是<strong>whenComplete</strong>方法，当提供的计算本身遇到异常并且没有异常结束，那么它会使用前一个异常来结束。</li>
+</ul>
+<p>所有方法都遵循上述触发，执行和异常完成规范。另外，对于前一个完成的方法传递的结果（即，对于类型为T的参数），是可能为空的，此处可能出发<strong>NullPointerException</strong>。<br>此接口没有定义实例化创建，强制正常或异常完成，查询完成状态或结果或等待阶段完成的方法。CompletionStage的实现可以酌情提供实现此类效果的方法。方法<strong>toCompletableFuture</strong>通过提供一个公共的转换类型使这个接口的不同实现之间具有互操作性。</p>
+<h2 id="BiFunction"><a href="#BiFunction" class="headerlink" title="BiFunction"></a>BiFunction</h2><p>JDK注释：表示接受两个参数并生成结果的函数。这是一个功能性接口，功能方法是apply(Object, Object)</p>
+<h2 id="接口方法"><a href="#接口方法" class="headerlink" title="接口方法"></a>接口方法</h2><table>
+<thead>
+<tr>
+<th>同步</th>
+<th>异步</th>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>thenApply</td>
+<td>thenApplyAsync</td>
+<td><code>Function&lt;T,U&gt;</code></td>
+<td>利用前一阶段的计算结果生成新的计算结果，<code>CompletableFuture&lt;T&gt;</code>转换成<code>CompletableFuture&lt;U&gt;</code></td>
+</tr>
+<tr>
+<td>thenAccept</td>
+<td>thenAcceptAsync</td>
+<td><code>Consumer&lt;T&gt;</code></td>
+<td>消费前一阶段的计算结果，不返回新的计算值，主要用于添加回调</td>
+</tr>
+<tr>
+<td>thenRun</td>
+<td>thenRunAsync</td>
+<td><code>Runnable</code></td>
+<td>不使用前一阶段的结算结果，不返回新的计算值</td>
+</tr>
+<tr>
+<td>thenCombine</td>
+<td>thenCombineAsync</td>
+<td><code>CompletionStage&lt;U&gt;</code></td>
+<td>连接另外一个<code>CompletionStage</code>的结果, 执行BiFunction.apply，产生新的计算结果</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>BiFunction&lt;T,U,V&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>thenAcceptBoth</td>
+<td>thenAcceptBothAsync</td>
+<td><code>CompletionStage&lt;U&gt;</code></td>
+<td>组合另外一个异步的结果，利用前两个阶段的计算结果，不产生新的计算结果</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>BiFunction&lt;T,U&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>runAfterBoth</td>
+<td>runAfterBothAsync</td>
+<td><code>CompletionStage&lt;？&gt;</code></td>
+<td>两个<code>CompletionStage</code>都完成后,再执一个<code>Runnable</code>，并且不使用这两个计算结果，也不产生新的计算结果。</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Runnable</code></td>
+<td></td>
+</tr>
+<tr>
+<td>applyToEither</td>
+<td>applyToEitherAsync</td>
+<td><code>CompletionStage&lt;T&gt;</code></td>
+<td>任意一个<code>CompletionStage</code>完成，Function被执行，利用完成的<code>CompletionStage</code>计算结果作为参数返回新的计算结果</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Function&lt;T,U&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>acceptEither</td>
+<td>acceptEitherAsync</td>
+<td><code>CompletionStage&lt;T&gt;</code></td>
+<td>任意一个<code>CompletionStage</code>完成，利用计算结果执行action，不返回新的计算结果</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Consumer&lt;T&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>runAfterEither</td>
+<td>runAfterEitherAsync</td>
+<td><code>CompletionStage&lt;？&gt;</code></td>
+<td>任意一个<code>CompletionStage</code>完成执行Runnable，不利用前一阶段计算结果，也不返回新的计算及过</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>Runnable</code></td>
+<td></td>
+</tr>
+<tr>
+<td>thenCompose</td>
+<td>thenComposeAsync</td>
+<td><code>Function&lt;T, CompletionStage&lt;U&gt;&gt;</code></td>
+<td>用来连接两个<code>CompletionStage</code>，生产新的<code>CompletionStage</code></td>
+</tr>
+<tr>
+<td>exceptionally</td>
+<td>-</td>
+<td><code>Function&lt;Throwable, ? extends T&gt;</code></td>
+<td>任一阶段抛出异常，就会触发<code>exceptionally</code>，入参为异常</td>
+</tr>
+<tr>
+<td>whenComplete</td>
+<td>whenCompleteAsync</td>
+<td><code>BiConsumer&lt;? super T, ? super Throwable&gt;</code></td>
+<td>计算结果完成时的处理,可以捕获异常，不生成新的计算结果</td>
+</tr>
+<tr>
+<td>handle</td>
+<td>handleAsync</td>
+<td><code>BiConsumer&lt;? super T, ? super U&gt;</code></td>
+<td>生成新的计算结果，有<code>whenComplete</code>和转换结果的两个功能</td>
+</tr>
+</tbody>
+</table>
+<h2 id="接口方法规律"><a href="#接口方法规律" class="headerlink" title="接口方法规律"></a>接口方法规律</h2><ol>
+<li>以Async结尾：表示异步方法，此类方法存在重载方法，多一个参数<code>Executor executor</code>,表示异步计算放到executor线程池执行 </li>
+<li>apply：用前一阶段参数，产生新的计算结果  Function&lt;T,U&gt;</li>
+<li>accept：用前一阶段参数，不产生新的计算结果 Consume<t></t></li>
+<li>run：不用前一阶段参数，不产生新的计算结果 Run</li>
+<li>compose：用前一阶段参数，产生子流程，最后效果等于apply</li>
+<li>then：描述串行关系，前一阶段完成再执行新的阶段</li>
+<li>combine/Both：描述汇聚关系AND，等待两个阶段执行完，再执行新的阶段，combine会产生新的计算结果，both不会</li>
+<li>Either：描述汇聚关系OR，两个阶段任意一个执行完，再执行新的阶段</li>
+</ol>
+<h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><p>JAVA异常处理的格式是<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	<span class="comment">// do it...</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">	<span class="comment">// handle exception</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">finally</span> &#123;</span><br><span class="line">	<span class="comment">// ......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>exceptionally 就相当于<code>catch (Exception e)</code>；handle/whenComplete就相当于<code>finally</code>,它们区别在于whenComplete不会返回新的计算结果，而handle可以。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/mynote/tags/java/" rel="tag"># java</a>
+          
+            <a href="/mynote/tags/juc/" rel="tag"># juc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/05/17/future/" rel="next" title="Future 与 Callable">
+                <i class="fa fa-chevron-left"></i> Future 与 Callable
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">哩厘理濿</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/mynote/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CompletionStage"><span class="nav-number">1.</span> <span class="nav-text">CompletionStage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BiFunction"><span class="nav-number">2.</span> <span class="nav-text">BiFunction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口方法"><span class="nav-number">3.</span> <span class="nav-text">接口方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口方法规律"><span class="nav-number">4.</span> <span class="nav-text">接口方法规律</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常处理"><span class="nav-number">5.</span> <span class="nav-text">异常处理</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">哩厘理濿</span><br>
+<img alt="知识共享许可协议" style="border-width:0;display:inline" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png">
+本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+  
+
+  
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/mynote/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/mynote/js/utils.js?v=7.1.0"></script>
+
+  <script src="/mynote/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/mynote/js/schemes/muse.js?v=7.1.0"></script>
+
+
+
+
+  
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/mynote/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
