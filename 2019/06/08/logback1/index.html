@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/mynote/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/mynote/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/mynote/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/mynote/images/favicon-32x32-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/mynote/images/favicon-16x16-next.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/mynote/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/mynote/',
+    scheme: 'Mist',
+    version: '7.1.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="关于logback使用的总结 配置文件的加载logback的初始化步骤 logback 会在类路径下寻找名为 logback-test.xml 的文件。 如果没有找到，logback 会继续寻找名为 logback.groovy 的文件。 如果没有找到，logback 会继续寻找名为 logback.xml 的文件。4.如果没有找到，将会通过 JDK 提供的 ServiceLoader 工具在类路">
+<meta name="keywords" content="java,log">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Logback - 配置说明">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/06/08/logback1/index.html">
+<meta property="og:site_name" content="Note">
+<meta property="og:description" content="关于logback使用的总结 配置文件的加载logback的初始化步骤 logback 会在类路径下寻找名为 logback-test.xml 的文件。 如果没有找到，logback 会继续寻找名为 logback.groovy 的文件。 如果没有找到，logback 会继续寻找名为 logback.xml 的文件。4.如果没有找到，将会通过 JDK 提供的 ServiceLoader 工具在类路">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://s2.ax1x.com/2019/06/08/VBx7dA.png">
+<meta property="og:image" content="https://s2.ax1x.com/2019/06/08/VBxHII.png">
+<meta property="og:updated_time" content="2019-06-08T08:12:16.451Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Logback - 配置说明">
+<meta name="twitter:description" content="关于logback使用的总结 配置文件的加载logback的初始化步骤 logback 会在类路径下寻找名为 logback-test.xml 的文件。 如果没有找到，logback 会继续寻找名为 logback.groovy 的文件。 如果没有找到，logback 会继续寻找名为 logback.xml 的文件。4.如果没有找到，将会通过 JDK 提供的 ServiceLoader 工具在类路">
+<meta name="twitter:image" content="https://s2.ax1x.com/2019/06/08/VBx7dA.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/06/08/logback1/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Logback - 配置说明 | Note</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/mynote/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/06/08/logback1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Logback - 配置说明
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-06-08 10:24:57 / Modified: 16:12:16" itemprop="dateCreated datePublished" datetime="2019-06-08T10:24:57+08:00">2019-06-08</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>关于logback使用的总结</p>
+<h2 id="配置文件的加载"><a href="#配置文件的加载" class="headerlink" title="配置文件的加载"></a>配置文件的加载</h2><h3 id="logback的初始化步骤"><a href="#logback的初始化步骤" class="headerlink" title="logback的初始化步骤"></a>logback的初始化步骤</h3><ol>
+<li>logback 会在类路径下寻找名为 logback-test.xml 的文件。</li>
+<li>如果没有找到，logback 会继续寻找名为 logback.groovy 的文件。</li>
+<li>如果没有找到，logback 会继续寻找名为 logback.xml 的文件。<br>4.如果没有找到，将会通过 JDK 提供的 ServiceLoader 工具在类路径下寻找文件 META-INFO/services/ch.qos.logback.classic.spi.Configurator，该文件的内容为实现了 Configurator 接口的实现类的全限定类名。</li>
+<li>如果以上都没有成功，logback 会通过 BasicConfigurator 为自己进行配置，并且日志将会全部在控制台打印出来。 </li>
+</ol>
+<h3 id="指定默认的配置文件"><a href="#指定默认的配置文件" class="headerlink" title="指定默认的配置文件"></a>指定默认的配置文件</h3><p><code>System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, &quot;configurationFile.xml&quot;);</code>必须在 logger 实例创建前进行设置。 </p>
+<h2 id="日志等级"><a href="#日志等级" class="headerlink" title="日志等级"></a>日志等级</h2><p>对于一个给定的名为L的logger，它的有效等级为从自身一直回溯到root logger（按照包名logger.name的包的关系回溯），直到找到第一个不为空的等级作为自己的等级。为了确保所有的logger都有一个层级，root logger会有一个默认等级DEBUG。<br>基本选择规则：日志的打印级别为 p，Logger 实例的级别为 q，如果 p &gt;= q，则该条日志可以打印出来。日志实例级别可以通过<code></code>logger.setLevel(Level.INFO);`设置。各等级的排序为：<strong>TRACE &lt; DEBUG &lt; INFO &lt; WARN &lt; ERROR</strong><br><img src="https://s2.ax1x.com/2019/06/08/VBx7dA.png" alt="日志等级"></p>
+<h2 id="配置节点如图"><a href="#配置节点如图" class="headerlink" title="配置节点如图"></a>配置节点如图</h2><p>最基本的结构为 <code>&lt;configuration&gt;</code> 元素，包含 0 或多个 <code>&lt;appender&gt;</code> 元素，其后跟 0 或多个 <code>&lt;logger&gt;</code> 元素，其后再跟最多只能存在一个的 <code>&lt;root&gt;</code> 元素。<br><img src="https://s2.ax1x.com/2019/06/08/VBxHII.png" alt="配置节点"></p>
+<h2 id="单位说明"><a href="#单位说明" class="headerlink" title="单位说明"></a>单位说明</h2><p>时间： millisecond, second,  minute,  hour, day<br>文件大小： KB，MB，GB</p>
+<h2 id="节点说明"><a href="#节点说明" class="headerlink" title="节点说明"></a>节点说明</h2><h3 id="configuration"><a href="#configuration" class="headerlink" title="configuration"></a>configuration</h3><p>scan：true/false，配置文件更改时，自动加载。默认值为true。<br>scanPeriod：扫描周期，时间单位可以是毫秒、秒、分钟或者小时，eg：30 seconds。 默认一分钟扫描一次配置文件<br>packagingData：true/false，展示包数据，logback 会在堆栈的每一行显示 jar 包的名字以及 jar 的版本号（可以很好的解决 jar 版本冲突的问题）。<br>debug：true/false，打印出logback内部日志信息，实时查看logback运行状态。默认值为false。</p>
+<h3 id="property"><a href="#property" class="headerlink" title="property"></a>property</h3><p>用来定义变量值的标签，用<code>${}</code>来使用变量。<br>scope：local/context/system，作用域，默认为local。会先从本地（local）范围去找，再从上下文（context）去找，再从系统属性（system）中去找，最后会去系统的环境变量中去找。</p>
+<h4 id="1-配置单独的变量"><a href="#1-配置单独的变量" class="headerlink" title="1. 配置单独的变量"></a>1. 配置单独的变量</h4><p>name：变量的名称<br>value：变量的值</p>
+<h4 id="2-配置properties文件"><a href="#2-配置properties文件" class="headerlink" title="2. 配置properties文件"></a>2. 配置properties文件</h4><p>file：文件绝对路径<br>resource：classpath路径</p>
+<h3 id="timestamp"><a href="#timestamp" class="headerlink" title="timestamp"></a>timestamp</h3><p>获取当前时间戳，并按照指定格式转为字符串<br>key：字符串变量的名字<br>datePattern：时间格式。<br>timeReference：contextBirth。 上下文初始化时间</p>
+<h3 id="logger"><a href="#logger" class="headerlink" title="logger"></a>logger</h3><p>配置日志打印信息，主要指定两种信息：对具体的包或类生效；日志输出目的地；<br>name：代码中的包或者类，<strong>必须</strong>包含一个 name 属性。<br>level：TRACE/DEBUG/INFO/WARN/ERROR/ALL/OFF/INHERITED/NULL，打印级别。当level的值为INHERITED/NULL时，将会强制logger继承上一层级别。<br>addtivity：true/false，向上级loger传递打印信息，默认true。一个appender-ref会打印一种日志，true表示会使用父级的appender-ref打印日志。</p>
+<h3 id="root"><a href="#root" class="headerlink" title="root"></a>root</h3><p>根loger，相当于logger的全局配置。<strong>只有一个level属性</strong>，name已经被命名为root.<br>level：同logger的level，但是不能设置为INHERITED或者同义词NULL。默认是DEBUG。<strong>logger节点的level优先</strong></p>
+<h3 id="appender-ref"><a href="#appender-ref" class="headerlink" title="appender-ref"></a>appender-ref</h3><p>logger和root元素包含0或多个appender-ref元素<br>ref：指定appender的名称</p>
+<h3 id="appender"><a href="#appender" class="headerlink" title="appender"></a>appender</h3><p>日志输出目的地<br>name：名称，必须配置<br>class：指定类的全限定名用于实例化，必须配置<br>immediateFlush：true/false。立即刷新输出流可以确保日志事件被立即写入，并且可以保证一旦你的应用没有正确关闭 appender，日志事件也不会丢失。从另一方面来说，设置这个属性为 false，有可能会使日志的吞吐量翻两番(视情况而定)。但是设置为 false，当应用退出的时候没有正确关闭 appender，会导致日志事件没有被写入磁盘，可能会丢失。默认true</p>
+<h4 id="encoder"><a href="#encoder" class="headerlink" title="encoder"></a>encoder</h4><p>encoder 将日志事件转换为字节数组。<br>outputPatternAsHeader标签：true/false，将格式化字符串插入到日志文件的顶部，默认false<br>layout标签：class属性指定打日志格式的全类名</p>
+<h5 id="pattern-格式"><a href="#pattern-格式" class="headerlink" title="pattern 格式"></a>pattern 格式</h5><p><strong>大小敏感</strong><br>c{length}，lo{length}，logger{length}：输出 logger 的名字作为日志事件的来源<br>C{length}，class{length}：日志请求的类的全限定名称<br>contextName，cn： logger 上下文的名字<br>d{pattern}，date{pattern}，d{pattern, timezone}，date{pattern, timezone}：输出日志事件的日期，字符串的语法与 SimpleDateFormat 中的格式完全兼容。<br>F，file：日志请求的 Java 源文件名，应该避免使用<br>caller{depth}，caller{depthStart..depthEnd}：日志的调用者所在的位置信息<br>L，line：发出日志请求所在的行号，避免使用<br>m，msg，message：输出与日志事件相关联的，由应用程序提供的日志信息<br>M，method：输出发出日志请求的方法名，避免使用<br>n：输出平台所依赖的行分割字符<br>p，le，level：日志事件的级别<br>r，relative：输出应用程序启动到创建日志事件所花费的毫秒数<br>t，thread：输出生成日志事件的线程名<br>X{key:-defaultVal}，mdc{key:-defaultVal}：输出生成日志事件的线程的 MDC (mapped diagnostic context)<br>ex{depth}，exception{depth}，throwable{depth}：输出日志事件相关的堆栈信息，默认情况下会输出全部的堆栈信息。depth参数：</p>
+<ul>
+<li><em>short</em>：输出堆栈信息的第一行</li>
+<li><em>full</em>：输出全部的堆栈信息</li>
+<li><em>任意整数</em>：输出指定行数的堆栈信息 </li>
+</ul>
+<p>xEx{depth}，xException{depth}，xThrowable{depth}：跟 %throwable 类似，只不过多了类的包信息。在每个堆栈信息的末尾，多了包含 jar 文件的字符串，后面再加上具体的实现版本<br>rEx{depth}，rootException{depth}：输出与日志事件相关的堆栈信息，根异常将会首先输出，而是标准的”根异常最后输出”<br>nopex，nopexception：不会输出任何数据<br>marker：输出与日志请求相关的标签，父标签与子标签格式：parentName [child1, child2]<br>property{key}：输出属性 key 所对应的值<br>replace(p){r, t}：在子模式 ‘p’ 产生的字符中，将所有出现正则表达式 ‘r’ 的地方替换为 ‘t’。例如，”%replace(%msg){‘\s’, ‘’}” 将会移除事件消息中所有空格。模式 ‘p’ 可以是任意复杂的甚至由多个转换字符组成。例如，”%replace(%logger %msg){‘.’, ‘/‘}” 将会替换 logger 以及消息中所有的点为斜杆。</p>
+<h5 id="pattern-格式修改器"><a href="#pattern-格式修改器" class="headerlink" title="pattern 格式修改器"></a>pattern 格式修改器</h5><p>在格式修改器的帮助下，可以对每个数据字段进行对齐，以及更改最大最小宽度，可选的格式修改器放在百分号跟转换字符之间。<br>eg：%-20.30logger<br>-：左对齐<br>第一个数字20：最小宽度20<br>.：最大宽度<br>第二个数字30：最大宽度30</p>
+<h5 id="pattern-着色"><a href="#pattern-着色" class="headerlink" title="pattern 着色"></a>pattern 着色</h5><p>PatternLayout 可以识别 “%black”，”%red”，”%green”，”%yellow”，”%blue”，”%magenta”,”%cyan”, “%white”, “%gray”, “%boldRed”,”%boldGreen”, “%boldYellow”, “%boldBlue”, “%boldMagenta””%boldCyan”, “%boldWhite” 以及 “%highlight” 作为转换字符。</p>
+<h4 id="class属性值配置"><a href="#class属性值配置" class="headerlink" title="class属性值配置"></a>class属性值配置</h4><h5 id="1-ch-qos-logback-core-ConsoleAppender"><a href="#1-ch-qos-logback-core-ConsoleAppender" class="headerlink" title="1. ch.qos.logback.core.ConsoleAppender"></a>1. ch.qos.logback.core.ConsoleAppender</h5><p>target标签：System.out 或 System.err。默认为 System.out<br>withJansi标签：使用ANSI彩色代码，默认值为 false</p>
+<h5 id="2-ch-qos-logback-core-FileAppender"><a href="#2-ch-qos-logback-core-FileAppender" class="headerlink" title="2. ch.qos.logback.core.FileAppender"></a>2. ch.qos.logback.core.FileAppender</h5><p>file标签：要写入文件的名称。如果文件不存在，则新建。没有默认值。<strong>file是指实时日志的名称，fileNamePattern指归档日志的名称</strong><br>append标签：true/false。日志被追加到文件结尾，false会清空现存文件，默认true。<br>prudent标签：严格模式，会将日志安全的写入指定文件，若应用每秒产生了 100 个以上的 I/O 操作，性能会受到明显的影响，应该避免使用严格模式。。默认false</p>
+<h5 id="3-ch-qos-logback-core-rolling-RollingFileAppender"><a href="#3-ch-qos-logback-core-rolling-RollingFileAppender" class="headerlink" title="3. ch.qos.logback.core.rolling.RollingFileAppender"></a>3. ch.qos.logback.core.rolling.RollingFileAppender</h5><p>file/append/prudent同上。</p>
+<h6 id="rollingPolicy标签"><a href="#rollingPolicy标签" class="headerlink" title="rollingPolicy标签"></a>rollingPolicy标签</h6><p>轮转策略，当轮转发生时，指定RollingFileAppender的行为<br>class：行为具体的实现类<br><strong>策略1 ch.qos.logback.core.rolling.TimeBasedRollingPolicy – 基于时间</strong><br>既负责轮转的行为，也负责触发轮转，支持文件自动压缩。如果fileNamePattern以.gz或者.zip结尾，将会启动这个特性。<br><em>fileNamePattern标签</em>：存在两个目的-通过该属性可以进行周期性的轮转并且得到每个归档文件的名字</p>
+<ol>
+<li><code>%d</code> 每天轮转（晚上零点）。由于省略了指定 %d 的日期格式，所以默认为 yyyy-MM-dd</li>
+<li><code>%d{yyyy/MM}</code> 每个月开始的时候轮转</li>
+<li><code>%d{yyyy-ww}</code> 每周的第一天（取决于时区）</li>
+<li><code>%d{yyyy-MM-dd_HH}</code> 每小时轮转    </li>
+<li><code>%d{yyyy-MM-dd_HH-mm}</code> 每分钟轮转</li>
+</ol>
+<p>日前格式可以配置在文件名上或者文件路径上，例如<code>%d{yyyy/MM}/foo.txt</code>会生成2019/06/foo.txt文件。<br><em>maxHistory标签</em>：最多保留多少数量的归档文件，将会异步删除旧的文件。比如，你指定按月轮转，指定 maxHistory = 6，那么 6 个月内的归档文件将会保留在文件夹内，大于 6 个月的将会被删除。<br><em>totalSizeCap标签</em>：控制所有归档文件总的大小。当达到这个大小后，旧的归档文件将会被异步的删除。使用这个属性时还需要设置 maxHistory 属性。而且，maxHistory 将会被作为第一条件，该属性作为第二条件。eg：3GB<br><em>cleanHistoryOnStart标签</em>：true/false 在 appender 启动的时候，删除归档文件。默认的值为false。<br><strong>策略2 ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy – 基于大小以及时间</strong><br>按时轮转，但同时又限制每个日志文件的大小。<br><em>fileNamePattern标签</em>：除了 %d 之外还有 %i。这两个占位符都是强制要求。日志文件达到了maxFileSize指定的大小，会进行归档，递增索引从0开始。<br><em>maxFileSize标签</em>：单个文件大小，eg：100MB<br><strong>策略3  ch.qos.logback.core.rolling.FixedWindowRollingPolicy – 固定窗口算法</strong><br><em>minIndex标签</em>：窗口索引下界<br><em>maxIndex标签</em>：窗口索引上界<br><em>fileNamePattern标签</em>：必须包含一个 i% 的占位符，该占位符指明了窗口索引的值应该插入的位置。例如，当该属性的值为MyLogFile%i.log，最小与最大的值分别为1和3。将会产生的归档文件为MyLogFile1.log，MyLogFile2.log，MyLogFile3.log。</p>
+<h6 id="triggeringPolicy标签"><a href="#triggeringPolicy标签" class="headerlink" title="triggeringPolicy标签"></a>triggeringPolicy标签</h6><p>触发策略，通知RollingFileAppender何时轮转<br><strong>ch.qos.logback.core.rolling.FixedWindowRollingPolicy</strong> – 文件的大小<br>观察当前活动文件的大小，如果已经大于了指定的值，它会给 RollingFileAppender 发一个信号触发对当前活动文件的轮转。<br><em>maxFileSize标签</em>：文件大小限制，默认值10 MB</p>
+<h5 id="4-ch-qos-logback-classic-AsyncAppender"><a href="#4-ch-qos-logback-classic-AsyncAppender" class="headerlink" title="4. ch.qos.logback.classic.AsyncAppender"></a>4. ch.qos.logback.classic.AsyncAppender</h5><p>异步的打印 ILoggingEvent。它仅仅是作为一个事件调度器的存在，因此必须调用其它的 appender 来完成操作。<br>queueSize：队列的最大容量，默认为 256<br>discardingThreshold：当队列还剩余 20% 的容量时，会丢弃级别为 TRACE, DEBUG 与 INFO 的日志，仅仅只保留 WARN 与 ERROR 级别的日志。想要保留所有的事件，可以设置为 0<br>includeCallerData：获取调用者的数据相对来说比较昂贵。为了提高性能，默认情况下不会获取调用者的信息。默认false<br>maxFlushTime：指定最大的刷新时间，单位为毫秒。在指定时间内没有被处理完的事件将会被丢弃<br>neverBlock：默认false，appender会阻塞而不是丢弃信息。设置为true，appender 不会阻塞你的应用而会将消息丢弃</p>
+<h5 id="5-ch-qos-logback-classic-db-DBAppender"><a href="#5-ch-qos-logback-classic-db-DBAppender" class="headerlink" title="5. ch.qos.logback.classic.db.DBAppender"></a>5. ch.qos.logback.classic.db.DBAppender</h5><p>将日志插入第三方数据库，使用前需要新建三张表：logging_event, logging_event_property 与 logging_event_exception。建表脚本在 logback-classic/src/main/java/ch/qos/logback/classic/db/script<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--使用链接池--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">appender</span> <span class="attr">name</span>=<span class="string">"DB"</span> <span class="attr">class</span>=<span class="string">"ch.qos.logback.classic.db.DBAppender"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">connectionSource</span></span></span><br><span class="line"><span class="tag">    <span class="attr">class</span>=<span class="string">"ch.qos.logback.core.db.DataSourceConnectionSource"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dataSource</span></span></span><br><span class="line"><span class="tag">      <span class="attr">class</span>=<span class="string">"com.mchange.v2.c3p0.ComboPooledDataSource"</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">driverClass</span>&gt;</span>com.mysql.jdbc.Driver<span class="tag">&lt;/<span class="name">driverClass</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">jdbcUrl</span>&gt;</span>jdbc:mysql://$&#123;serverName&#125;:$&#123;port&#125;/$&#123;dbName&#125;<span class="tag">&lt;/<span class="name">jdbcUrl</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">user</span>&gt;</span>$&#123;user&#125;<span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">password</span>&gt;</span>$&#123;password&#125;<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dataSource</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">connectionSource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">appender</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h5 id="6-ch-qos-logback-classic-net-SocketAppender"><a href="#6-ch-qos-logback-classic-net-SocketAppender" class="headerlink" title="6. ch.qos.logback.classic.net.SocketAppender"></a>6. ch.qos.logback.classic.net.SocketAppender</h5><p>可以将 ILoggingEvent 实例序列化再传输到远端机器。当使用SocketAppender时，日志事件将以明文发送。<br>includeCallerData标签：true/false，默认false。调用者的信息发送到服务端<br>port标签：远程服务器的端口号<br>remoteHost标签：服务器的主机名<br>reconnectionDelay标签：重连的间隔时间，eg：<code>10 seconds</code>。默认值为 30 seconds。将这个值设置为 0，将会关闭重连机制。<br>queueSize标签：传输到服务端的日志事件队列长度，队列的长度大于 1 可以提高性能，消除网络引起的延时。<br>eventDelayLimit标签：在丢弃事件之前的等待时间，默认值为 100 millisecond</p>
+<h5 id="7-ch-qos-logback-classic-net-SSLSocketAppender"><a href="#7-ch-qos-logback-classic-net-SSLSocketAppender" class="headerlink" title="7. ch.qos.logback.classic.net.SSLSocketAppender"></a>7. ch.qos.logback.classic.net.SSLSocketAppender</h5><p>日志事件将通过安全的通道传输。</p>
+<h5 id="8-ch-qos-logback-classic-net-SMTPAppender"><a href="#8-ch-qos-logback-classic-net-SMTPAppender" class="headerlink" title="8. ch.qos.logback.classic.net.SMTPAppender"></a>8. ch.qos.logback.classic.net.SMTPAppender</h5><p>SMTP 邮件是异步发送的。默认情况下，当日志的级别为 ERROR 时，邮件发送将会被触发。收集日志事件到一个或多个固定大小的缓冲区，所有事件都使用同一个缓冲区。<br>smtpHost标签：SMTP 服务器的主机名<br>smtpPort标签：SMPT 服务监听的端口。默认为 25<br>to标签：接收者的邮件地址。可以配置多个<br>from标签：发件人，格式遵循邮件通用格式<br>username标签：用户名<br>password标签：密码<br>要用的时候再来研究…</p>
+<h5 id="9-ch-qos-logback-classic-sift-SiftingAppender"><a href="#9-ch-qos-logback-classic-sift-SiftingAppender" class="headerlink" title="9. ch.qos.logback.classic.sift.SiftingAppender"></a>9. ch.qos.logback.classic.sift.SiftingAppender</h5><p>根据给定的运行时属性分离或者过滤日志。</p>
+<h5 id="10-ch-qos-logback-classic-net-SyslogAppender"><a href="#10-ch-qos-logback-classic-net-SyslogAppender" class="headerlink" title="10. ch.qos.logback.classic.net.SyslogAppender"></a>10. ch.qos.logback.classic.net.SyslogAppender</h5><p>syslog 协议：syslog 发送者将信息发送给 syslog 接收者。接收者通常叫做 syslog 守护线程 或者 syslog 服务器。logback 可以把消息发送给远程的 syslog 守护线程。</p>
+<h3 id="statusListener"><a href="#statusListener" class="headerlink" title="statusListener"></a>statusListener</h3><p>状态监听器<br>class：监听器的全类名<br>logback 子级实现了几个监听器。OnConsoleStatusListener 用于在控制台打印状态消息。OnErrorConsoleStatusListener 用于在控制台打印显示错误的状态信息。NopStatusListener 会丢弃掉状态信息。</p>
+<h3 id="shutdownHook"><a href="#shutdownHook" class="headerlink" title="shutdownHook"></a>shutdownHook</h3><p>class：指定一个JVM shutdown hook关闭logback并释放资源。默认值：ch.qos.logback.core.hook.DefaultShutdownHook</p>
+<h2 id="关闭Log"><a href="#关闭Log" class="headerlink" title="关闭Log"></a>关闭Log</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.sflf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> ch.qos.logback.classic.LoggerContext;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();</span><br><span class="line">loggerContext.stop();</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/mynote/tags/java/" rel="tag"># java</a>
+          
+            <a href="/mynote/tags/log/" rel="tag"># log</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/06/07/cyclicBarrier/" rel="next" title="CyclicBarrier">
+                <i class="fa fa-chevron-left"></i> CyclicBarrier
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">哩厘理濿</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/mynote/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件的加载"><span class="nav-number">1.</span> <span class="nav-text">配置文件的加载</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#logback的初始化步骤"><span class="nav-number">1.1.</span> <span class="nav-text">logback的初始化步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定默认的配置文件"><span class="nav-number">1.2.</span> <span class="nav-text">指定默认的配置文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志等级"><span class="nav-number">2.</span> <span class="nav-text">日志等级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置节点如图"><span class="nav-number">3.</span> <span class="nav-text">配置节点如图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单位说明"><span class="nav-number">4.</span> <span class="nav-text">单位说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节点说明"><span class="nav-number">5.</span> <span class="nav-text">节点说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#configuration"><span class="nav-number">5.1.</span> <span class="nav-text">configuration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#property"><span class="nav-number">5.2.</span> <span class="nav-text">property</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-配置单独的变量"><span class="nav-number">5.2.1.</span> <span class="nav-text">1. 配置单独的变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-配置properties文件"><span class="nav-number">5.2.2.</span> <span class="nav-text">2. 配置properties文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timestamp"><span class="nav-number">5.3.</span> <span class="nav-text">timestamp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#logger"><span class="nav-number">5.4.</span> <span class="nav-text">logger</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#root"><span class="nav-number">5.5.</span> <span class="nav-text">root</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#appender-ref"><span class="nav-number">5.6.</span> <span class="nav-text">appender-ref</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#appender"><span class="nav-number">5.7.</span> <span class="nav-text">appender</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#encoder"><span class="nav-number">5.7.1.</span> <span class="nav-text">encoder</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#pattern-格式"><span class="nav-number">5.7.1.1.</span> <span class="nav-text">pattern 格式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#pattern-格式修改器"><span class="nav-number">5.7.1.2.</span> <span class="nav-text">pattern 格式修改器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#pattern-着色"><span class="nav-number">5.7.1.3.</span> <span class="nav-text">pattern 着色</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#class属性值配置"><span class="nav-number">5.7.2.</span> <span class="nav-text">class属性值配置</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-ch-qos-logback-core-ConsoleAppender"><span class="nav-number">5.7.2.1.</span> <span class="nav-text">1. ch.qos.logback.core.ConsoleAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-ch-qos-logback-core-FileAppender"><span class="nav-number">5.7.2.2.</span> <span class="nav-text">2. ch.qos.logback.core.FileAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-ch-qos-logback-core-rolling-RollingFileAppender"><span class="nav-number">5.7.2.3.</span> <span class="nav-text">3. ch.qos.logback.core.rolling.RollingFileAppender</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#rollingPolicy标签"><span class="nav-number">5.7.2.3.1.</span> <span class="nav-text">rollingPolicy标签</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#triggeringPolicy标签"><span class="nav-number">5.7.2.3.2.</span> <span class="nav-text">triggeringPolicy标签</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-ch-qos-logback-classic-AsyncAppender"><span class="nav-number">5.7.2.4.</span> <span class="nav-text">4. ch.qos.logback.classic.AsyncAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-ch-qos-logback-classic-db-DBAppender"><span class="nav-number">5.7.2.5.</span> <span class="nav-text">5. ch.qos.logback.classic.db.DBAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-ch-qos-logback-classic-net-SocketAppender"><span class="nav-number">5.7.2.6.</span> <span class="nav-text">6. ch.qos.logback.classic.net.SocketAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-ch-qos-logback-classic-net-SSLSocketAppender"><span class="nav-number">5.7.2.7.</span> <span class="nav-text">7. ch.qos.logback.classic.net.SSLSocketAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8-ch-qos-logback-classic-net-SMTPAppender"><span class="nav-number">5.7.2.8.</span> <span class="nav-text">8. ch.qos.logback.classic.net.SMTPAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9-ch-qos-logback-classic-sift-SiftingAppender"><span class="nav-number">5.7.2.9.</span> <span class="nav-text">9. ch.qos.logback.classic.sift.SiftingAppender</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#10-ch-qos-logback-classic-net-SyslogAppender"><span class="nav-number">5.7.2.10.</span> <span class="nav-text">10. ch.qos.logback.classic.net.SyslogAppender</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#statusListener"><span class="nav-number">5.8.</span> <span class="nav-text">statusListener</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shutdownHook"><span class="nav-number">5.9.</span> <span class="nav-text">shutdownHook</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关闭Log"><span class="nav-number">6.</span> <span class="nav-text">关闭Log</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">哩厘理濿</span><br>
+<img alt="知识共享许可协议" style="border-width:0;display:inline" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png">
+本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+  
+
+  
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/mynote/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/mynote/js/utils.js?v=7.1.0"></script>
+
+  <script src="/mynote/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/mynote/js/schemes/muse.js?v=7.1.0"></script>
+
+
+
+
+  
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/mynote/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
