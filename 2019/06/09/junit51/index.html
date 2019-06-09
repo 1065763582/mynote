@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/mynote/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/mynote/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/mynote/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/mynote/images/favicon-32x32-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/mynote/images/favicon-16x16-next.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/mynote/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/mynote/',
+    scheme: 'Mist',
+    version: '7.1.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="官方文档参考JUnit 5 = JUnit Platform + JUnit Jupiter + JUnit Vintage.JUnit Platform为在JVM上启动测试框架提供基础.JUnit Jupiter是在JUnit 5中编写测试和扩展的新型编程模型和扩展模型的组合.JUnit Vintage提供TestEngine，用于在平台上运行基于JUnit 3和JUnit 4的测试. mave">
+<meta name="keywords" content="java,测试">
+<meta property="og:type" content="article">
+<meta property="og:title" content="junit5 - 常用测试总结">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/06/09/junit51/index.html">
+<meta property="og:site_name" content="Note">
+<meta property="og:description" content="官方文档参考JUnit 5 = JUnit Platform + JUnit Jupiter + JUnit Vintage.JUnit Platform为在JVM上启动测试框架提供基础.JUnit Jupiter是在JUnit 5中编写测试和扩展的新型编程模型和扩展模型的组合.JUnit Vintage提供TestEngine，用于在平台上运行基于JUnit 3和JUnit 4的测试. mave">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-06-09T07:28:28.674Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="junit5 - 常用测试总结">
+<meta name="twitter:description" content="官方文档参考JUnit 5 = JUnit Platform + JUnit Jupiter + JUnit Vintage.JUnit Platform为在JVM上启动测试框架提供基础.JUnit Jupiter是在JUnit 5中编写测试和扩展的新型编程模型和扩展模型的组合.JUnit Vintage提供TestEngine，用于在平台上运行基于JUnit 3和JUnit 4的测试. mave">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/06/09/junit51/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>junit5 - 常用测试总结 | Note</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/mynote/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/06/09/junit51/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">junit5 - 常用测试总结
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-06-09 09:20:14 / Modified: 15:28:28" itemprop="dateCreated datePublished" datetime="2019-06-09T09:20:14+08:00">2019-06-09</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" rel="noopener">官方文档</a>参考<br>JUnit 5 = JUnit Platform + JUnit Jupiter + JUnit Vintage.<br>JUnit Platform为在JVM上启动测试框架提供基础.<br>JUnit Jupiter是在JUnit 5中编写测试和扩展的新型编程模型和扩展模型的组合.<br>JUnit Vintage提供TestEngine，用于在平台上运行基于JUnit 3和JUnit 4的测试.</p>
+<h1 id="maven"><a href="#maven" class="headerlink" title="maven"></a>maven</h1><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.junit.jupiter<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit-jupiter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>5.4.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="标准测试"><a href="#标准测试" class="headerlink" title="标准测试"></a>标准测试</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.jupiter.api.Assertions.fail;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.jupiter.api.Assumptions.assumeTrue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.AfterAll;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.AfterEach;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.BeforeAll;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.BeforeEach;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.Disabled;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.Test;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StandardTests</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *  <span class="doctag">@BeforeAll</span> 测试类中只执行一次（per-class）</span></span><br><span class="line"><span class="comment">     *             在所有测试方法执行前执行</span></span><br><span class="line"><span class="comment">     *             在BeforeEach之前执行</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@BeforeAll</span></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initAll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *  <span class="doctag">@BeforeEach</span> 在每个测试方法执行前执行一次（per-method）</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     */</span> </span><br><span class="line">    <span class="meta">@BeforeEach</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@Test</span> 表示方法是测试方法。</span></span><br><span class="line"><span class="comment">     *       与JUnit4的<span class="doctag">@Test</span>注解不同的是，这个注解没有声明任何属性</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">succeedingTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * fail 声明此测试方法失败，但是不会中断执行，会继续执行其他方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">failingTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        fail(<span class="string">"a failing test"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@Disabled</span> 禁用测试方法， 参数字符串填入禁用方法的原因</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="meta">@Disabled</span>(<span class="string">"for demonstration purposes"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">skippedTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// not executed</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@DisplayName</span> 自定义测试方法名称，</span></span><br><span class="line"><span class="comment">     *              用于在插件用展示，提高区分度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="meta">@DisplayName</span>(<span class="string">"😱"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">testWithDisplayNameContainingEmoji</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * assume系列 必须规定具备某个条件才允许测试，但又不判断为fail,</span></span><br><span class="line"><span class="comment">     *           若不满足assume的条件，判断为disable</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * assert系列 断言，不满足条件会判断为fail</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">abortedTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        assumeTrue(<span class="string">"abc"</span>.contains(<span class="string">"Z"</span>));</span><br><span class="line">        assertTrue(<span class="string">"abc"</span>.contains(<span class="string">"Z"</span>));</span><br><span class="line">        fail(<span class="string">"test should have been aborted"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@Order</span> 定义测试方法执行顺序</span></span><br><span class="line"><span class="comment">     *        配合<span class="doctag">@TestMethodOrder</span>(OrderAnnotation.class)使用才能生效</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="meta">@Order</span>(<span class="number">1</span>)</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">nullValues</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// perform assertions against null values</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@AfterEach</span> 每个方法执行完之后执行</span></span><br><span class="line"><span class="comment">     */</span> </span><br><span class="line">    <span class="meta">@AfterEach</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">tearDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@AfterAll</span> 每个类执行完之后执行</span></span><br><span class="line"><span class="comment">                 在AfterEach之后执行</span></span><br><span class="line"><span class="comment">     */</span> </span><br><span class="line">    <span class="meta">@AfterAll</span></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">tearDownAll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="循环测试"><a href="#循环测试" class="headerlink" title="循环测试"></a>循环测试</h1><h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><p>循环测试使用注解@RepeatedTest<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 占位符&#123;displayName&#125;表示<span class="doctag">@RepeatedTest</span>方法的显示名称</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">String DISPLAY_NAME_PLACEHOLDER = <span class="string">"&#123;displayName&#125;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 占位符&#123;currentRepetition&#125;表示<span class="doctag">@RepeatedTest</span>方法的当前重复次数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">String CURRENT_REPETITION_PLACEHOLDER = <span class="string">"&#123;currentRepetition&#125;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 占位符&#123;totalRepetitions&#125;表示<span class="doctag">@RepeatedTest</span>方法的重复总次数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">String TOTAL_REPETITIONS_PLACEHOLDER = <span class="string">"&#123;totalRepetitions&#125;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 重复测试的短名称模式，</span></span><br><span class="line"><span class="comment"> * eg：repetition 1 of 10</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #CURRENT_REPETITION_PLACEHOLDER</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #TOTAL_REPETITIONS_PLACEHOLDER</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #LONG_DISPLAY_NAME</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">String SHORT_DISPLAY_NAME = <span class="string">"repetition "</span> + CURRENT_REPETITION_PLACEHOLDER + <span class="string">" of "</span> + TOTAL_REPETITIONS_PLACEHOLDER;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 重复测试的长名称模式，</span></span><br><span class="line"><span class="comment"> * eg： mytest::repetition 1 of 10</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #DISPLAY_NAME_PLACEHOLDER</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #SHORT_DISPLAY_NAME</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">String LONG_DISPLAY_NAME = DISPLAY_NAME_PLACEHOLDER + <span class="string">" :: "</span> + SHORT_DISPLAY_NAME;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 循环总次数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">value</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 每次循环的方法名称，默认使用短名称</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">String <span class="title">name</span><span class="params">()</span> <span class="keyword">default</span> SHORT_DISPLAY_NAME</span>;</span><br></pre></td></tr></table></figure></p>
+<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.jupiter.api.Assertions.assertEquals;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.logging.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.BeforeEach;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.DisplayName;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.RepeatedTest;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.RepetitionInfo;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.TestInfo;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RepeatedTestsDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> Logger logger = Logger.getLogger(<span class="string">"mytest"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 在每个测试方法前执行打印日志</span></span><br><span class="line"><span class="comment">     * testInfo和repetitionInfo由junit5注入</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> testInfo 获取有关当前测试的信息，例如测试的显示名称，测试类，测试方法或关联的标签</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> repetitionInfo 获取当前重复信息以及相应的<span class="doctag">@RepeatedTest</span>的重复总数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">	<span class="meta">@BeforeEach</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">beforeEach</span><span class="params">(TestInfo testInfo, RepetitionInfo repetitionInfo)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">int</span> currentRepetition = repetitionInfo.getCurrentRepetition();</span><br><span class="line">		<span class="keyword">int</span> totalRepetitions = repetitionInfo.getTotalRepetitions();</span><br><span class="line">		String methodName = testInfo.getTestMethod().get().getName();</span><br><span class="line">		logger.info(String.format(<span class="string">"About to execute repetition %d of %d for %s"</span>, <span class="comment">//</span></span><br><span class="line">				currentRepetition, totalRepetitions, methodName));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重复执行10次，每次执行的名称为：repetition 1 of 10</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">	<span class="meta">@RepeatedTest</span>(<span class="number">10</span>)</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">repeatedTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重复执行5次，每次执行名称：repetition 1 of 10</span></span><br><span class="line"><span class="comment">     * 由junit5自动注入了repetitionInfo</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">	<span class="meta">@RepeatedTest</span>(<span class="number">5</span>)</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">repeatedTestWithRepetitionInfo</span><span class="params">(RepetitionInfo repetitionInfo)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 获取循环总次数</span></span><br><span class="line">		assertEquals(<span class="number">5</span>, repetitionInfo.getTotalRepetitions());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 执行一次，使用自定义名称：Repeat! 1/1</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * 由junit5自动注入了testInfo</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">	<span class="meta">@RepeatedTest</span>(value = <span class="number">1</span>, name = <span class="string">"&#123;displayName&#125; &#123;currentRepetition&#125;/&#123;totalRepetitions&#125;"</span>)</span><br><span class="line">	<span class="meta">@DisplayName</span>(<span class="string">"Repeat!"</span>)</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">customDisplayName</span><span class="params">(TestInfo testInfo)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 获取本次循环方法的名称</span></span><br><span class="line">		assertEquals(<span class="string">"Repeat! 1/1"</span>, testInfo.getDisplayName());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 循环一次， 使用长名称：Details... :: repetition 1 of 1</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">	<span class="meta">@RepeatedTest</span>(value = <span class="number">1</span>, name = RepeatedTest.LONG_DISPLAY_NAME)</span><br><span class="line">	<span class="meta">@DisplayName</span>(<span class="string">"Details..."</span>)</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">customDisplayNameWithLongPattern</span><span class="params">(TestInfo testInfo)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 获取本次循环方法的名称</span></span><br><span class="line">		assertEquals(<span class="string">"Details... :: repetition 1 of 1"</span>, testInfo.getDisplayName());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 循环5次， 使用自定义名称：Wiederholung 1 von 5</span></span><br><span class="line">	<span class="meta">@RepeatedTest</span>(value = <span class="number">5</span>, name = <span class="string">"Wiederholung &#123;currentRepetition&#125; von &#123;totalRepetitions&#125;"</span>)</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">repeatedTestInGerman</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="参数化测试"><a href="#参数化测试" class="headerlink" title="参数化测试"></a>参数化测试</h1><p>需要指明测试类型<code>@ParameterizedTest</code>, 参数name和@RepeatedTest相同，只是占位符(测试名称，参数索引，参数值)和格式不同。</p>
+<h2 id="ValueSource"><a href="#ValueSource" class="headerlink" title="@ValueSource"></a><code>@ValueSource</code></h2><p>最简单的参数化方式之一。指定单个值数组，并且只能用于为每个参数化测试调用提供单个参数。只能用于指定类型：<strong>short，byte，int，long，float，double，char，java.lang.String，java.lang.Class</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@ValueSource</span>(ints = &#123; <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> &#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithValueSource</span><span class="params">(<span class="keyword">int</span> argument)</span> </span>&#123;</span><br><span class="line">    assertTrue(argument &gt; <span class="number">0</span> &amp;&amp; argument &lt; <span class="number">4</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="NullSource"><a href="#NullSource" class="headerlink" title="@NullSource"></a><code>@NullSource</code></h2><p>提供一个null参数, 值类型不能使用</p>
+<h2 id="EmptySource"><a href="#EmptySource" class="headerlink" title="@EmptySource"></a><code>@EmptySource</code></h2><p>提供一个空参数，用于类型：java.lang.String，java.util.List，java.util.Set，java.util.Map，原始数组（例如，int [] ，char [] []等），对象数组（例如，String []，Integer [] []等）</p>
+<h2 id="NullAndEmptySource"><a href="#NullAndEmptySource" class="headerlink" title="@NullAndEmptySource"></a><code>@NullAndEmptySource</code></h2><p>组合@NullSource和@EmptySource<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@NullSource</span></span><br><span class="line"><span class="meta">@EmptySource</span></span><br><span class="line"><span class="meta">@ValueSource</span>(strings = &#123; <span class="string">" "</span>, <span class="string">"   "</span>, <span class="string">"\t"</span>, <span class="string">"\n"</span> &#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">nullEmptyAndBlankStrings</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">    assertTrue(text == <span class="keyword">null</span> || text.trim().isEmpty());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="EnumSource"><a href="#EnumSource" class="headerlink" title="@EnumSource"></a><code>@EnumSource</code></h2><p>提供了一种使用Enum常量的便捷方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 以每个枚举值为参数执行方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@EnumSource</span>(TimeUnit.class)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithEnumSource</span><span class="params">(TimeUnit timeUnit)</span> </span>&#123;</span><br><span class="line">	assertNotNull(timeUnit);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 以指定的枚举值为参数执行方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@EnumSource</span>(value = TimeUnit.class, mode = INCLUDE, names = &#123; <span class="string">"DAYS"</span>, <span class="string">"HOURS"</span> &#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithEnumSourceInclude</span><span class="params">(TimeUnit timeUnit)</span> </span>&#123;</span><br><span class="line">	assertTrue(EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS).contains(timeUnit));</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 排除指定的枚举值，用剩余的枚举值为参数执行方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@EnumSource</span>(value = TimeUnit.class, mode = EXCLUDE, names = &#123; <span class="string">"DAYS"</span>, <span class="string">"HOURS"</span> &#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithEnumSourceExclude</span><span class="params">(TimeUnit timeUnit)</span> </span>&#123;</span><br><span class="line">	assertFalse(EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS).contains(timeUnit));</span><br><span class="line">	assertTrue(timeUnit.name().length() &gt; <span class="number">5</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 以匹配正则表达式的枚举为参数执行方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@EnumSource</span>(value = TimeUnit.class, mode = MATCH_ALL, names = <span class="string">"^(M|N).+SECONDS$"</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithEnumSourceRegex</span><span class="params">(TimeUnit timeUnit)</span> </span>&#123;</span><br><span class="line">	String name = timeUnit.name();</span><br><span class="line">	assertTrue(name.startsWith(<span class="string">"M"</span>) || name.startsWith(<span class="string">"N"</span>));</span><br><span class="line">	assertTrue(name.endsWith(<span class="string">"SECONDS"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="MethodSource"><a href="#MethodSource" class="headerlink" title="@MethodSource"></a><code>@MethodSource</code></h2><p>引用测试类或外部类的一个或多个工厂方法。除非使用<code>@TestInstance（Lifecycle.PER_CLASS）</code>注释测试类，否则测试类中的工厂方法必须是静态的。方法需要返回Stream，Collection，Iterator，Iterable，对象数组和基础类型数组。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//-----------------------单个参数Demo-------------------------</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 使用指定方法产生参数执行测试</span></span><br><span class="line"><span class="comment"> * 可以不指定MethodSource的name产生， 会自动查找和测试方法名称一样的方法执行</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@MethodSource</span>(<span class="string">"stringProvider"</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithExplicitLocalMethodSource</span><span class="params">(String argument)</span> </span>&#123;</span><br><span class="line">	assertNotNull(argument);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> Stream&lt;String&gt; <span class="title">stringProvider</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> Stream.of(<span class="string">"apple"</span>, <span class="string">"banana"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//-----------------------多个参数Demo-------------------------</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 使用arguments方法聚合每次调用的参数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@MethodSource</span>(<span class="string">"stringIntAndListProvider"</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithMultiArgMethodSource</span><span class="params">(String str, <span class="keyword">int</span> num, List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">	assertEquals(<span class="number">5</span>, str.length());</span><br><span class="line">	assertTrue(num &gt;=<span class="number">1</span> &amp;&amp; num &lt;=<span class="number">2</span>);</span><br><span class="line">	assertEquals(<span class="number">2</span>, list.size());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> Stream&lt;Arguments&gt; <span class="title">stringIntAndListProvider</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> Stream.of(</span><br><span class="line">			arguments(<span class="string">"apple"</span>, <span class="number">1</span>, Arrays.asList(<span class="string">"a"</span>, <span class="string">"b"</span>)),</span><br><span class="line">			arguments(<span class="string">"lemon"</span>, <span class="number">2</span>, Arrays.asList(<span class="string">"x"</span>, <span class="string">"y"</span>))</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//-----------------------调用其他类中的方法Demo-------------------------</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExternalMethodSourceDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ParameterizedTest</span></span><br><span class="line">    <span class="meta">@MethodSource</span>(<span class="string">"example.StringsProviders#tinyStrings"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">testWithExternalMethodSource</span><span class="params">(String tinyString)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// test with tiny string</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StringsProviders</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> Stream&lt;String&gt; <span class="title">tinyStrings</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Stream.of(<span class="string">"."</span>, <span class="string">"oo"</span>, <span class="string">"OOO"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="CsvSource"><a href="#CsvSource" class="headerlink" title="@CsvSource"></a><code>@CsvSource</code></h2><p>将参数列表表示为逗号分隔值<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 字符串的顺序和参数顺序一一对应</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@CsvSource</span>(&#123;</span><br><span class="line">		<span class="string">"apple,         1"</span>,</span><br><span class="line">		<span class="string">"banana,        2"</span>,</span><br><span class="line">		<span class="string">"'lemon, lime', 0xF1"</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithCsvSource</span><span class="params">(String fruit, <span class="keyword">int</span> rank)</span> </span>&#123;</span><br><span class="line">	assertNotNull(fruit);</span><br><span class="line">	assertNotEquals(<span class="number">0</span>, rank);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="CsvFileSource"><a href="#CsvFileSource" class="headerlink" title="@CsvFileSource"></a><code>@CsvFileSource</code></h2><p>允许您使用类路径中的CSV文件。 CSV文件中的每一行都会导致参数化测试的一次调用。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@CsvFileSource</span>(resources = <span class="string">"/two-column.csv"</span>, numLinesToSkip = <span class="number">1</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithCsvFileSource</span><span class="params">(String country, <span class="keyword">int</span> reference)</span> </span>&#123;</span><br><span class="line">    assertNotNull(country);</span><br><span class="line">    assertNotEquals(<span class="number">0</span>, reference);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="ArgumentsSource"><a href="#ArgumentsSource" class="headerlink" title="@ArgumentsSource"></a><code>@ArgumentsSource</code></h2><p>可用于指定自定义，可重用的ArgumentsProvider,ArgumentsProvider的实现必须声明为顶级类或静态嵌套类。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@ArgumentsSource</span>(MyArgumentsProvider.class)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithArgumentsSource</span><span class="params">(String argument)</span> </span>&#123;</span><br><span class="line">    assertNotNull(argument);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyArgumentsProvider</span> <span class="keyword">implements</span> <span class="title">ArgumentsProvider</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Stream&lt;? extends Arguments&gt; provideArguments(ExtensionContext context) &#123;</span><br><span class="line">        <span class="keyword">return</span> Stream.of(<span class="string">"apple"</span>, <span class="string">"banana"</span>).map(Arguments::of);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参数化对象"><a href="#参数化对象" class="headerlink" title="参数化对象"></a>参数化对象</h2><p>实现ArgumentsAggregator接口，将参数转换为对象<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@CsvSource</span>(&#123;</span><br><span class="line">    <span class="string">"Jane, Doe, F, 1990-05-20"</span>,</span><br><span class="line">    <span class="string">"John, Doe, M, 1990-10-22"</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithArgumentsAggregator</span><span class="params">(@AggregateWith(PersonAggregator.class)</span> Person person) </span>&#123;</span><br><span class="line">    <span class="comment">// perform assertions against person</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonAggregator</span> <span class="keyword">implements</span> <span class="title">ArgumentsAggregator</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Person <span class="title">aggregateArguments</span><span class="params">(ArgumentsAccessor arguments, ParameterContext context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Person(arguments.getString(<span class="number">0</span>),</span><br><span class="line">                          arguments.getString(<span class="number">1</span>),</span><br><span class="line">                          arguments.get(<span class="number">2</span>, Gender.class),</span><br><span class="line">                          arguments.get(<span class="number">3</span>, LocalDate.class));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>若多处使用，可以尝试简化<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="meta">@Target</span>(ElementType.PARAMETER)</span><br><span class="line"><span class="meta">@AggregateWith</span>(PersonAggregator.class)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> CsvToPerson &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 简化后</span></span><br><span class="line"><span class="meta">@ParameterizedTest</span></span><br><span class="line"><span class="meta">@CsvSource</span>(&#123;</span><br><span class="line">    <span class="string">"Jane, Doe, F, 1990-05-20"</span>,</span><br><span class="line">    <span class="string">"John, Doe, M, 1990-10-22"</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">testWithCustomAggregatorAnnotation</span><span class="params">(@CsvToPerson Person person)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// perform assertions against person</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="动态测试"><a href="#动态测试" class="headerlink" title="动态测试"></a>动态测试</h1><p>动态测试使用<code>@TestFactory</code>，表示方法是一个测试工厂方法，@TestFactory方法必须返回DynamicNode实例的Collection, Iterable, Iterator, Stream，本质上就是一个产生测试方法的方法，并且执行产生的这些方法的测试。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@TestFactory</span></span><br><span class="line"><span class="function">Stream&lt;DynamicTest&gt; <span class="title">dynamicTestsFromStream</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="string">"racecar"</span>, <span class="string">"radar"</span>, <span class="string">"mom"</span>, <span class="string">"dad"</span>)</span><br><span class="line">        .map(text -&gt; dynamicTest(text, () -&gt; assertTrue(<span class="keyword">true</span>)));</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@TestFactory</span></span><br><span class="line"><span class="function">Collection&lt;DynamicTest&gt; <span class="title">dynamicTestsFromCollection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Arrays.asList(</span><br><span class="line">        dynamicTest(<span class="string">"1st dynamic test"</span>, () -&gt; assertTrue(<span class="keyword">true</span>)),</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/mynote/tags/java/" rel="tag"># java</a>
+          
+            <a href="/mynote/tags/测试/" rel="tag"># 测试</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/06/08/logback1/" rel="next" title="Logback - 配置说明">
+                <i class="fa fa-chevron-left"></i> Logback - 配置说明
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">哩厘理濿</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/mynote/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#maven"><span class="nav-number">1.</span> <span class="nav-text">maven</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#标准测试"><span class="nav-number">2.</span> <span class="nav-text">标准测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#循环测试"><span class="nav-number">3.</span> <span class="nav-text">循环测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#属性"><span class="nav-number">3.1.</span> <span class="nav-text">属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#demo"><span class="nav-number">3.2.</span> <span class="nav-text">demo</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参数化测试"><span class="nav-number">4.</span> <span class="nav-text">参数化测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ValueSource"><span class="nav-number">4.1.</span> <span class="nav-text">@ValueSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NullSource"><span class="nav-number">4.2.</span> <span class="nav-text">@NullSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EmptySource"><span class="nav-number">4.3.</span> <span class="nav-text">@EmptySource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NullAndEmptySource"><span class="nav-number">4.4.</span> <span class="nav-text">@NullAndEmptySource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EnumSource"><span class="nav-number">4.5.</span> <span class="nav-text">@EnumSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MethodSource"><span class="nav-number">4.6.</span> <span class="nav-text">@MethodSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CsvSource"><span class="nav-number">4.7.</span> <span class="nav-text">@CsvSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CsvFileSource"><span class="nav-number">4.8.</span> <span class="nav-text">@CsvFileSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ArgumentsSource"><span class="nav-number">4.9.</span> <span class="nav-text">@ArgumentsSource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数化对象"><span class="nav-number">4.10.</span> <span class="nav-text">参数化对象</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态测试"><span class="nav-number">5.</span> <span class="nav-text">动态测试</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">哩厘理濿</span><br>
+<img alt="知识共享许可协议" style="border-width:0;display:inline" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png">
+本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+  
+
+  
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/mynote/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/mynote/js/utils.js?v=7.1.0"></script>
+
+  <script src="/mynote/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/mynote/js/schemes/muse.js?v=7.1.0"></script>
+
+
+
+
+  
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/mynote/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
