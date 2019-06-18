@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/mynote/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/mynote/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/mynote/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/mynote/images/favicon-32x32-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/mynote/images/favicon-16x16-next.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/mynote/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/mynote/',
+    scheme: 'Mist',
+    version: '7.1.0',
+    sidebar: {"position":"left","display":"hide","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Java 8为Date和Time引入新API的目的是，解决旧java.util.Date和java.util.Calendar的缺点：  线程安全 - Date和Calendar不是线程安全的 易于理解的API - Date和Calendar API设计不当，没有足够的方法来执行日常操作，新的日期/时间API是以ISO为中心的。 时区的处理 - 使用Local和ZonedDate / Time A">
+<meta name="keywords" content="java,time">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java.time">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2019/06/15/datetime/index.html">
+<meta property="og:site_name" content="Note">
+<meta property="og:description" content="Java 8为Date和Time引入新API的目的是，解决旧java.util.Date和java.util.Calendar的缺点：  线程安全 - Date和Calendar不是线程安全的 易于理解的API - Date和Calendar API设计不当，没有足够的方法来执行日常操作，新的日期/时间API是以ISO为中心的。 时区的处理 - 使用Local和ZonedDate / Time A">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-06-18T14:19:47.405Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java.time">
+<meta name="twitter:description" content="Java 8为Date和Time引入新API的目的是，解决旧java.util.Date和java.util.Calendar的缺点：  线程安全 - Date和Calendar不是线程安全的 易于理解的API - Date和Calendar API设计不当，没有足够的方法来执行日常操作，新的日期/时间API是以ISO为中心的。 时区的处理 - 使用Local和ZonedDate / Time A">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2019/06/15/datetime/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>java.time | Note</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/mynote/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/mynote/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2019/06/15/datetime/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="哩厘理濿">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java.time
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-06-15 13:51:26" itemprop="dateCreated datePublished" datetime="2019-06-15T13:51:26+08:00">2019-06-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-06-18 22:19:47" itemprop="dateModified" datetime="2019-06-18T22:19:47+08:00">2019-06-18</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Java 8为Date和Time引入新API的目的是，解决旧java.util.Date和java.util.Calendar的缺点：</p>
+<ol>
+<li>线程安全 - Date和Calendar不是线程安全的</li>
+<li>易于理解的API - Date和Calendar API设计不当，没有足够的方法来执行日常操作，新的日期/时间API是以ISO为中心的。</li>
+<li>时区的处理 - 使用Local和ZonedDate / Time API。 </li>
+</ol>
+<p>Java中使用的历法是ISO 8601日历系统，它是世界民用历法，也就是我们所说的公历。</p>
+<h1 id="日期与时间"><a href="#日期与时间" class="headerlink" title="日期与时间"></a>日期与时间</h1><p>LocalDate：表示日期<br>LocalTime：表示时间<br>LocalDateTime：表示日期时间<br>Instant：在时间线上模拟单个瞬时点</p>
+<h2 id="实例化"><a href="#实例化" class="headerlink" title="实例化"></a>实例化</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取当前日期 2019-06-15</span></span><br><span class="line">LocalDate localDate = LocalDate.now();</span><br><span class="line"><span class="comment">// 指定日期 2019-06-15</span></span><br><span class="line">LocalDate localDate2 = LocalDate.of(<span class="number">2019</span>, <span class="number">6</span>, <span class="number">15</span>);</span><br><span class="line"><span class="comment">// 获取当前时间 14:27:16.579</span></span><br><span class="line">LocalTime localTime1 = LocalTime.now();</span><br><span class="line"><span class="comment">// 指定时间 参数：时，分，秒，毫秒</span></span><br><span class="line">LocalTime localTime2 = LocalTime.of(<span class="number">14</span>, <span class="number">27</span>);</span><br><span class="line"><span class="comment">// 获取日期+时间</span></span><br><span class="line">LocalDateTime localDateTime1 = LocalDateTime.now();</span><br><span class="line"><span class="comment">// 指定日期+时间，参数分为两种情况：</span></span><br><span class="line"><span class="comment">// 1. LocalDate，LocalTime</span></span><br><span class="line"><span class="comment">// 2. 年，月，日，时，分，秒，毫秒</span></span><br><span class="line">LocalDateTime.of(<span class="number">2019</span>,<span class="number">6</span>,<span class="number">15</span>,<span class="number">14</span>,<span class="number">30</span>);</span><br></pre></td></tr></table></figure>
+<p>of和now是一个静态工厂方法，用于获取时间，他们区别是now获取当前日期时间，而of只要指定日期时间。</p>
+<h2 id="日期时间单位"><a href="#日期时间单位" class="headerlink" title="日期时间单位"></a>日期时间单位</h2><p><strong>java.time.temporal.ChronoUnit</strong> 时间单位，主要用于计算</p>
+<table>
+<thead>
+<tr>
+<th>枚举值</th>
+<th>单位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NANOS</td>
+<td>纳秒，是支持的最小时间单位</td>
+</tr>
+<tr>
+<td>MICROS</td>
+<td>微秒</td>
+</tr>
+<tr>
+<td>MILLIS</td>
+<td>毫秒</td>
+</tr>
+<tr>
+<td>SECONDS</td>
+<td>秒</td>
+</tr>
+<tr>
+<td>MINUTES</td>
+<td>分</td>
+</tr>
+<tr>
+<td>HOURS</td>
+<td>时</td>
+</tr>
+<tr>
+<td>HALF_DAYS</td>
+<td>半天，等于12小时</td>
+</tr>
+<tr>
+<td>DAYS</td>
+<td>天</td>
+</tr>
+<tr>
+<td>WEEKS</td>
+<td>周</td>
+</tr>
+<tr>
+<td>MONTHS</td>
+<td>月</td>
+</tr>
+<tr>
+<td>YEARS</td>
+<td>年</td>
+</tr>
+<tr>
+<td>DECADES</td>
+<td>十年</td>
+</tr>
+<tr>
+<td>CENTURIES</td>
+<td>世纪，等于100年</td>
+</tr>
+<tr>
+<td>MILLENNIA</td>
+<td>千年</td>
+</tr>
+<tr>
+<td>ERAS</td>
+<td>时代，等于1,000,000,000年，时间线的最大分支</td>
+</tr>
+<tr>
+<td>FOREVER</td>
+<td>永恒</td>
+</tr>
+</tbody>
+</table>
+<p><strong>java.time.temporal.ChronoField</strong> 时间段内的单位，主要用于获取时间</p>
+<table>
+<thead>
+<tr>
+<th>枚举值</th>
+<th>单位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NANO_OF_SECOND</td>
+<td>一秒内的纳秒数，从0到999,999,999</td>
+</tr>
+<tr>
+<td>NANO_OF_DAY</td>
+<td>一天内的纳秒数，从0到（24 <em> 60 </em> 60 * 1,000,000,000） -  1</td>
+</tr>
+<tr>
+<td>MICRO_OF_SECOND</td>
+<td>一秒内的微秒数，从0到999,999</td>
+</tr>
+<tr>
+<td>MICRO_OF_DAY</td>
+<td>一天内的微秒数，从0到（24 <em> 60 </em> 60 * 1,000,000） -  1</td>
+</tr>
+<tr>
+<td>MILLI_OF_SECOND</td>
+<td>一秒内的毫秒数，从0到999,999</td>
+</tr>
+<tr>
+<td>MILLI_OF_DAY</td>
+<td>一天内的豪秒数，从0到（24 <em> 60 </em> 60 * 1,000） -  1</td>
+</tr>
+<tr>
+<td>SECOND_OF_MINUTE</td>
+<td>一分钟内的秒数，从0到59</td>
+</tr>
+<tr>
+<td>SECOND_OF_DAY</td>
+<td>一天内的秒数，从0 到  (24 <em> 60 </em> 60) - 1</td>
+</tr>
+<tr>
+<td>MINUTE_OF_HOUR</td>
+<td>一小时内的分钟数，从0到59</td>
+</tr>
+<tr>
+<td>MINUTE_OF_DAY</td>
+<td>一天内的分钟数，从0 到 (24 * 60) - 1</td>
+</tr>
+<tr>
+<td>HOUR_OF_AMPM</td>
+<td>上午/下午过去的小时数，从0 到 11</td>
+</tr>
+<tr>
+<td>CLOCK_HOUR_OF_AMPM</td>
+<td>上午/下午时钟表示的小时数，从1 到 12</td>
+</tr>
+<tr>
+<td>HOUR_OF_DAY</td>
+<td>一天过去的小时数，从0 到 23</td>
+</tr>
+<tr>
+<td>CLOCK_HOUR_OF_DAY</td>
+<td>一天时钟表示的小时数，从1 到 24</td>
+</tr>
+<tr>
+<td>AMPM_OF_DAY</td>
+<td>一天中的上午0或下午1，从0 到 1</td>
+</tr>
+<tr>
+<td>DAY_OF_WEEK</td>
+<td>一周内的星期数，从星期一到星期日，从1 到 7</td>
+</tr>
+<tr>
+<td>ALIGNED_DAY_OF_WEEK_IN_MONTH</td>
+<td>一月内对齐的星期数，从1 到 7</td>
+</tr>
+<tr>
+<td>ALIGNED_DAY_OF_WEEK_IN_YEAR</td>
+<td>一年内对齐的星期数，从1 到 7</td>
+</tr>
+<tr>
+<td>DAY_OF_MONTH</td>
+<td>一个月内的日数，从1 到 31</td>
+</tr>
+<tr>
+<td>DAY_OF_YEAR</td>
+<td>一年内的天数，从1 到 366</td>
+</tr>
+<tr>
+<td>EPOCH_DAY</td>
+<td>从1970-01-01开始过去的天数</td>
+</tr>
+<tr>
+<td>ALIGNED_WEEK_OF_MONTH</td>
+<td>一个月内对齐的周，从1 到 5</td>
+</tr>
+<tr>
+<td>ALIGNED_WEEK_OF_YEAR</td>
+<td>一年内对齐的周，从1 到 53</td>
+</tr>
+<tr>
+<td>MONTH_OF_YEAR</td>
+<td>一年内对齐的月，从1 到 12</td>
+</tr>
+<tr>
+<td>PROLEPTIC_MONTH</td>
+<td>从0年开始按月计数，2019年6月将具有值（2019 * 12 + 6  -  1）</td>
+</tr>
+<tr>
+<td>YEAR_OF_ERA</td>
+<td>这个时代的年</td>
+</tr>
+<tr>
+<td>YEAR</td>
+<td>即将到来的一年</td>
+</tr>
+<tr>
+<td>ERA</td>
+<td>时代，时间线的最大分支</td>
+</tr>
+<tr>
+<td>INSTANT_SECONDS</td>
+<td>从1970-01-01T00：00开始过程的秒数</td>
+</tr>
+<tr>
+<td>OFFSET_SECONDS</td>
+<td>UTC / Greenwich当地时间偏移量</td>
+</tr>
+</tbody>
+</table>
+<p>注意：日期的标准模型基于三个概念 - 年，月和日。这些映射到YEAR，MONTH_OF_YEAR和DAY_OF_MONTH字段。日期的完整模型需要四个概念 - 时代，年，月和日。这些映射到ERA，YEAR_OF_ERA，MONTH_OF_YEAR和DAY_OF_MONTH字段。</p>
+<h2 id="加减"><a href="#加减" class="headerlink" title="加减"></a>加减</h2><p>加：<code>plus(long amountToAdd, TemporalUnit unit)</code>，接收两个参数：数字，时间单位<br>LocalDate支持单位：DAYS，WEEKS，MONTHS，YEARS，DECADES，CENTURIES，MILLENNIA，ERAS<br>LocalTime支持单位：NANOS，MICROS，MILLIS，SECONDS，MINUTES，HOURS，HALF_DAYS<br>LocalDateTime支持单位：除了FOREVER都支持。</p>
+<p>减：<code>minus(long amountToSubtract, TemporalUnit unit)</code>，同加法。减法minus等于是plus传入负数。</p>
+<h2 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime localDateTime1 = LocalDateTime.of(<span class="number">2019</span>,<span class="number">6</span>,<span class="number">14</span>,<span class="number">14</span>,<span class="number">23</span>);</span><br><span class="line">LocalDateTime localDateTime2 = LocalDateTime.now();</span><br><span class="line"><span class="comment">// localDateTime1 是否在 localDateTime2之后</span></span><br><span class="line">localDateTime1.isAfter(localDateTime2);<span class="comment">// false</span></span><br><span class="line"><span class="comment">// localDateTime1 是否在 localDateTime2之前</span></span><br><span class="line">localDateTime1.isBefore(localDateTime2);<span class="comment">// true</span></span><br><span class="line"><span class="comment">// localDateTime1 是否于 localDateTime2 在同一个时间点</span></span><br><span class="line">localDateTime1.isEqual(localDateTime2);<span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<h2 id="拼接日期时间-at"><a href="#拼接日期时间-at" class="headerlink" title="拼接日期时间- at"></a>拼接日期时间- at</h2><p>日期和时间可以相互拼接在一起，形成类LocalDateTime。</p>
+<p>LocalDate拼接LocalTime</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LocalDate.now().atTime(<span class="number">0</span>,<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>LocalTime拼接LocalDate</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LocalTime.now().atDate(LocalDate.now());</span><br></pre></td></tr></table></figure>
+<h2 id="修改日期-时间-with"><a href="#修改日期-时间-with" class="headerlink" title="修改日期/时间 - with"></a>修改日期/时间 - with</h2><p>with系列方法会修改日期对象，并且返回一个新的日期对象</p>
+<p>示例变量：<code>LocalDateTime t1 = LocalDateTime.now();</code></p>
+<h3 id="withXXX"><a href="#withXXX" class="headerlink" title="withXXX"></a>withXXX</h3><table>
+<thead>
+<tr>
+<th>示例</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>t1.withYear(2020);</td>
+<td>年修改为2020年</td>
+</tr>
+<tr>
+<td>t1.withMonth(7);</td>
+<td>月修改为7月</td>
+</tr>
+<tr>
+<td>t1.withDayOfMonth(4);</td>
+<td>日修改为当前月的4日</td>
+</tr>
+<tr>
+<td>t1.withDayOfYear(1);</td>
+<td>日期修改为年的第一天</td>
+</tr>
+<tr>
+<td>t1.withHour(1);</td>
+<td>时修改为1点</td>
+</tr>
+<tr>
+<td>t1.withMinute(1);</td>
+<td>分修改为1分</td>
+</tr>
+<tr>
+<td>t1.withSecond(1);</td>
+<td>秒修改为1秒</td>
+</tr>
+<tr>
+<td>1.withNano(1);</td>
+<td>纳秒修改为1纳秒</td>
+</tr>
+</tbody>
+</table>
+<h3 id="with"><a href="#with" class="headerlink" title="with"></a>with</h3><p><code>LocalDateTime with(TemporalField field, long newValue)</code>:表示要修改的单位和值</p>
+<p><code>LocalDateTime with(TemporalAdjuster adjuster)</code>:参数TemporalAdjuster时一个调整器，用于描述如何修改日期/时间.</p>
+<table>
+<thead>
+<tr>
+<th>示例</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>t1.with(DAY_OF_YEAR,270);</td>
+<td>日期修改为年的第270天的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.next(DayOfWeek.FRIDAY)</td>
+<td>日期修改为下一个周五的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)</td>
+<td>日期修改为下一个星期六的日期，若日期已在这一天，返回对象本身</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.previous(DayOfWeek.MONDAY)</td>
+<td>日期修改为前一个周一的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY)</td>
+<td>日期修改为前一个星期六的日期，若日期已在这一天，返回对象本身</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.firstDayOfNextYear()</td>
+<td>日期修改为下年的第一天的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.firstDayOfYear()</td>
+<td>日期修改为年第一天的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.firstInMonth(DayOfWeek.TUESDAY)</td>
+<td>日期修改为月的第一个周二的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.lastDayOfMonth()</td>
+<td>日期修改为月的最后一天的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.lastDayOfYear()</td>
+<td>日期修改为年的最后一天的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.lastInMonth(DayOfWeek.SATURDAY)</td>
+<td>日期修改为月的最后一个星期六的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.dayOfWeekInMonth(2, DayOfWeek.MONDAY)</td>
+<td>日期修改为月的第二个周一的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.firstDayOfNextMonth()</td>
+<td>日期修改为下月的第一天的日期</td>
+</tr>
+<tr>
+<td>TemporalAdjusters.firstDayOfMonth()</td>
+<td>日期修改为月第一天的日期</td>
+</tr>
+</tbody>
+</table>
+<h4 id="自定义调整器"><a href="#自定义调整器" class="headerlink" title="自定义调整器"></a>自定义调整器</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 返回一个调整器，将日期加两天</span></span><br><span class="line"><span class="keyword">static</span> TemporalAdjuster TWO_DAYS_LATER =</span><br><span class="line">       TemporalAdjusters.ofDateAdjuster(date -&gt; date.plusDays(<span class="number">2</span>));</span><br></pre></td></tr></table></figure>
+<h2 id="格式化"><a href="#格式化" class="headerlink" title="格式化"></a>格式化</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`localDateTime.format(DateTimeFormatter.ofPattern(``<span class="string">"yyyy/MM/dd"</span>``));`</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>占位符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G</td>
+<td>年代标志  公元</td>
+</tr>
+<tr>
+<td>yyyy</td>
+<td>年</td>
+</tr>
+<tr>
+<td>MM</td>
+<td>月</td>
+</tr>
+<tr>
+<td>MMM</td>
+<td>用月份名称简写显示月份，例如 Jun</td>
+</tr>
+<tr>
+<td>MMMMM</td>
+<td>用月份名称全称显示月份，例如 June</td>
+</tr>
+<tr>
+<td>dd</td>
+<td>日</td>
+</tr>
+<tr>
+<td>hh</td>
+<td>12小时制</td>
+</tr>
+<tr>
+<td>HH</td>
+<td>24小时制</td>
+</tr>
+<tr>
+<td>mm</td>
+<td>分</td>
+</tr>
+<tr>
+<td>ss</td>
+<td>秒</td>
+</tr>
+<tr>
+<td>SSS</td>
+<td>毫秒</td>
+</tr>
+<tr>
+<td>E</td>
+<td>星期</td>
+</tr>
+<tr>
+<td>D</td>
+<td>一年中的第几天</td>
+</tr>
+<tr>
+<td>F</td>
+<td>一月中的第几个星期</td>
+</tr>
+<tr>
+<td>w</td>
+<td>一年中的第几个星期</td>
+</tr>
+<tr>
+<td>W</td>
+<td>一月中的第几星期</td>
+</tr>
+<tr>
+<td>a</td>
+<td>上下午标识</td>
+</tr>
+<tr>
+<td>k</td>
+<td>和HH差不多 <strong>当数值小于10时,前面不会有0</strong></td>
+</tr>
+<tr>
+<td>K</td>
+<td>和hh差不多 <strong>当数值小于10时,前面不会有0</strong></td>
+</tr>
+<tr>
+<td>z</td>
+<td>时区</td>
+</tr>
+</tbody>
+</table>
+<h2 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h2><p>大多数是以<code>to</code>,parse开头的方法</p>
+<table>
+<thead>
+<tr>
+<th>转换方向</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LocalDateTime &#8594; LocalDate</td>
+<td>localDateTime.toLocalDate();</td>
+</tr>
+<tr>
+<td>LocalDateTime &#8594; LocalTime</td>
+<td>localDateTime.toLocalTime();</td>
+</tr>
+<tr>
+<td>String &#8594; LocalDateTime</td>
+<td>LocalDateTime.parse(“2019-06-15T00:00:00”);</td>
+</tr>
+<tr>
+<td>String &#8594; LocalDate</td>
+<td>LocalDate.parse(“2019-06-15”);</td>
+</tr>
+<tr>
+<td>String &#8594; LocalTime</td>
+<td>LocalTime.parse(“16:50”);</td>
+</tr>
+<tr>
+<td>Instant &#8594;LocalDateTime</td>
+<td>LocalDateTime.ofInstant(instant, ZoneId.systemDefault());</td>
+</tr>
+<tr>
+<td>LocalDateTime &#8594; Instant</td>
+<td>localDateTime.atZone(ZoneId.systemDefault()).toInstant();</td>
+</tr>
+<tr>
+<td>Date &#8594; Instant</td>
+<td>new Date().toInstant();</td>
+</tr>
+<tr>
+<td>Calendar &#8594; Instant</td>
+<td>Calendar.getInstance().toInstant();</td>
+</tr>
+<tr>
+<td>Instant &#8594; Date</td>
+<td>Date.from(Instant.now());</td>
+</tr>
+</tbody>
+</table>
+<h3 id="JDBC对应"><a href="#JDBC对应" class="headerlink" title="JDBC对应"></a>JDBC对应</h3><table>
+<thead>
+<tr>
+<th>JDBC类型</th>
+<th>JAVA类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>time</td>
+<td>LocalTime</td>
+</tr>
+<tr>
+<td>date</td>
+<td>LocalDate</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>LocalDateTime</td>
+</tr>
+</tbody>
+</table>
+<h2 id="时间段"><a href="#时间段" class="headerlink" title="时间段"></a>时间段</h2><h3 id="实例化-1"><a href="#实例化-1" class="headerlink" title="实例化"></a>实例化</h3><p>Duration：表示秒和纳秒的时间段，包含两部分：seconds表示秒，nanos表示纳秒。<br>Period：表示年/月/日的时间段。<br>存在两种实例化方式，between表示两个时间的时间段，of表示使用指定的时间段。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime from = LocalDateTime.now();</span><br><span class="line">LocalDateTime to = LocalDateTime.of(<span class="number">2019</span>, <span class="number">6</span>, <span class="number">18</span>, <span class="number">21</span>, <span class="number">20</span>, <span class="number">0</span>);</span><br><span class="line">Duration duration = Duration.between(from, to);</span><br><span class="line">Period period = Period.between(from, to);</span><br><span class="line"></span><br><span class="line">Duration duration1 = Duration.of(<span class="number">5</span>, ChronoUnit.DAYS);       <span class="comment">// 5天</span></span><br><span class="line">Duration duration2 = Duration.of(<span class="number">1000</span>, ChronoUnit.MILLIS);  <span class="comment">// 1000毫秒</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="获取时间段"><a href="#获取时间段" class="headerlink" title="获取时间段"></a>获取时间段</h3><p>to是获取对应单位的时间段，get方法仅仅是获取对应时间属性。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> days = duration.toDays();              <span class="comment">// 这段时间的总天数</span></span><br><span class="line"><span class="keyword">long</span> hours = duration.toHours();            <span class="comment">// 这段时间的小时数</span></span><br><span class="line"><span class="keyword">long</span> minutes = duration.toMinutes();        <span class="comment">// 这段时间的分钟数</span></span><br><span class="line"><span class="keyword">long</span> seconds = duration.getSeconds();       <span class="comment">// 这段时间的秒数</span></span><br><span class="line"><span class="keyword">long</span> milliSeconds = duration.toMillis();    <span class="comment">// 这段时间的毫秒数</span></span><br><span class="line"><span class="keyword">long</span> nanoSeconds = duration.toNanos();      <span class="comment">// 这段时间的纳秒数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">long</span> months = period.toTotalMonths();       <span class="comment">// 这段时间的总月数</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="时间段的计算"><a href="#时间段的计算" class="headerlink" title="时间段的计算"></a>时间段的计算</h3><p><code>plus</code>：系列方法表示加法<br><code>minus</code>：系列方法表示减法<br><code>multipliedBy</code>：表示乘法<br><code>dividedBy</code>：表示除法<br><code>abs</code>：表示绝对值<br><code>negated</code>：表示相反数</p>
+<h3 id="时间-时间段"><a href="#时间-时间段" class="headerlink" title="时间+时间段"></a>时间+时间段</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime from = LocalDateTime.now();</span><br><span class="line">Duration duration = Duration.ofDays(<span class="number">1</span>);</span><br><span class="line">LocalDateTime to = from.plus(duration);</span><br><span class="line"><span class="comment">// 等效于：</span></span><br><span class="line"><span class="comment">// LocalDateTime to = (LocalDateTime) duration.addTo(from);</span></span><br></pre></td></tr></table></figure>
+<h3 id="字符串转换"><a href="#字符串转换" class="headerlink" title="字符串转换"></a>字符串转换</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 格式为“PaYbMcD”: 以P开头，表示a年b月c天</span></span><br><span class="line">Period p = Period.parse(<span class="string">"P2Y3M5D"</span>); <span class="comment">// 2年3个月5天</span></span><br><span class="line"><span class="comment">// 格式为 “PaDTbHcMd.eS”：以P开头,表示a天。以T开头，表示b小时c分d秒e毫秒</span></span><br><span class="line">Duration d = Duration.parse(<span class="string">"P1DT1H10M10.5S"</span>);<span class="comment">// 1天1小时10分10秒5毫秒</span></span><br></pre></td></tr></table></figure>
+<h2 id="时区"><a href="#时区" class="headerlink" title="时区"></a>时区</h2><h3 id="实例化-2"><a href="#实例化-2" class="headerlink" title="实例化"></a>实例化</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取巴黎的时区</span></span><br><span class="line">ZoneId shanghaiZoneId = ZoneId.of(<span class="string">"Europe/Paris"</span>);</span><br><span class="line"><span class="comment">// 获取系统默认时区</span></span><br><span class="line">ZoneId systemZoneId = ZoneId.systemDefault();</span><br><span class="line"><span class="comment">// 使JDK1.8之前的时区转换为新的时区</span></span><br><span class="line">ZoneId oldToNewZoneId = TimeZone.getDefault().toZoneId();</span><br><span class="line"><span class="comment">// 可以打印出所有支持的时区字符串，可用于of实例化</span></span><br><span class="line">Set&lt;String&gt; zoneIds = ZoneId.getAvailableZoneIds();</span><br></pre></td></tr></table></figure>
+<h3 id="转换"><a href="#转换" class="headerlink" title="转换"></a>转换</h3><p>ZonedDateTime对象由两部分构成，LocalDateTime和ZoneId。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime localDateTime = LocalDateTime.now();</span><br><span class="line"><span class="comment">// 将普通的时间转换为带有时区的时间</span></span><br><span class="line">ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());</span><br><span class="line"><span class="comment">// 将字符串转为ZonedDateTime</span></span><br><span class="line">ZonedDateTime.parse(<span class="string">"2015-05-03T10:15:30+01:00[Europe/Paris]"</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="其他历法"><a href="#其他历法" class="headerlink" title="其他历法"></a>其他历法</h2><ul>
+<li><code>ThaiBuddhistDate</code>：泰国佛教历</li>
+<li><code>MinguoDate</code>：中华民国历</li>
+<li><code>JapaneseDate</code>：日本历</li>
+<li><code>HijrahDate</code>：伊斯兰历</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/mynote/tags/java/" rel="tag"># java</a>
+          
+            <a href="/mynote/tags/time/" rel="tag"># time</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/06/09/junit51/" rel="next" title="junit5 - 常用测试总结">
+                <i class="fa fa-chevron-left"></i> junit5 - 常用测试总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">哩厘理濿</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/mynote/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#日期与时间"><span class="nav-number">1.</span> <span class="nav-text">日期与时间</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#实例化"><span class="nav-number">1.1.</span> <span class="nav-text">实例化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日期时间单位"><span class="nav-number">1.2.</span> <span class="nav-text">日期时间单位</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加减"><span class="nav-number">1.3.</span> <span class="nav-text">加减</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#比较"><span class="nav-number">1.4.</span> <span class="nav-text">比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拼接日期时间-at"><span class="nav-number">1.5.</span> <span class="nav-text">拼接日期时间- at</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改日期-时间-with"><span class="nav-number">1.6.</span> <span class="nav-text">修改日期/时间 - with</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#withXXX"><span class="nav-number">1.6.1.</span> <span class="nav-text">withXXX</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#with"><span class="nav-number">1.6.2.</span> <span class="nav-text">with</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#自定义调整器"><span class="nav-number">1.6.2.1.</span> <span class="nav-text">自定义调整器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#格式化"><span class="nav-number">1.7.</span> <span class="nav-text">格式化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类型转换"><span class="nav-number">1.8.</span> <span class="nav-text">类型转换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JDBC对应"><span class="nav-number">1.8.1.</span> <span class="nav-text">JDBC对应</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时间段"><span class="nav-number">1.9.</span> <span class="nav-text">时间段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实例化-1"><span class="nav-number">1.9.1.</span> <span class="nav-text">实例化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取时间段"><span class="nav-number">1.9.2.</span> <span class="nav-text">获取时间段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间段的计算"><span class="nav-number">1.9.3.</span> <span class="nav-text">时间段的计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间-时间段"><span class="nav-number">1.9.4.</span> <span class="nav-text">时间+时间段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串转换"><span class="nav-number">1.9.5.</span> <span class="nav-text">字符串转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时区"><span class="nav-number">1.10.</span> <span class="nav-text">时区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实例化-2"><span class="nav-number">1.10.1.</span> <span class="nav-text">实例化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转换"><span class="nav-number">1.10.2.</span> <span class="nav-text">转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他历法"><span class="nav-number">1.11.</span> <span class="nav-text">其他历法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">哩厘理濿</span><br>
+<img alt="知识共享许可协议" style="border-width:0;display:inline" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png">
+本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+  
+
+  
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/mynote/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/mynote/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/mynote/js/utils.js?v=7.1.0"></script>
+
+  <script src="/mynote/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/mynote/js/schemes/muse.js?v=7.1.0"></script>
+
+
+
+
+  
+  <script src="/mynote/js/scrollspy.js?v=7.1.0"></script>
+<script src="/mynote/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/mynote/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
