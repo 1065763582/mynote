@@ -96,14 +96,18 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="tags">
-<meta property="og:url" content="https://1065763582.github.io/mynote/tags/index.html">
+  <meta name="description" content="Spring 中七种事务传播行为   事务传播行为类型 说明     PROPAGATION_REQUIRED 如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择   PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行。   PROPAGATION_MANDATORY 使用当前的事务，如果当前没有事务，就抛出异常。">
+<meta name="keywords" content="spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring事务Demo">
+<meta property="og:url" content="https://1065763582.github.io/mynote/2020/07/18/spring-transaction/index.html">
 <meta property="og:site_name" content="Lzq&#39;s Note">
+<meta property="og:description" content="Spring 中七种事务传播行为   事务传播行为类型 说明     PROPAGATION_REQUIRED 如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择   PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行。   PROPAGATION_MANDATORY 使用当前的事务，如果当前没有事务，就抛出异常。">
 <meta property="og:locale" content="cn">
-<meta property="og:updated_time" content="2019-06-18T14:35:57.636Z">
+<meta property="og:updated_time" content="2020-07-18T07:46:04.108Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tags">
+<meta name="twitter:title" content="Spring事务Demo">
+<meta name="twitter:description" content="Spring 中七种事务传播行为   事务传播行为类型 说明     PROPAGATION_REQUIRED 如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择   PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行。   PROPAGATION_MANDATORY 使用当前的事务，如果当前没有事务，就抛出异常。">
 
 
 
@@ -111,7 +115,7 @@
 
   
   
-  <link rel="canonical" href="https://1065763582.github.io/mynote/tags/">
+  <link rel="canonical" href="https://1065763582.github.io/mynote/2020/07/18/spring-transaction/">
 
 
 
@@ -121,7 +125,7 @@
   };
 </script>
 
-  <title>tags | Lzq's Note</title>
+  <title>Spring事务Demo | Lzq's Note</title>
   
 
 
@@ -224,7 +228,7 @@
         
         
           
-          <li class="menu-item menu-item-tags menu-item-active">
+          <li class="menu-item menu-item-tags">
 
     
     
@@ -263,22 +267,6 @@
   
     
 
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
-
   
 
   
@@ -305,104 +293,219 @@
 
   <div id="posts" class="posts-expand">
     
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://1065763582.github.io/mynote/mynote/2020/07/18/spring-transaction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Lzq">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/mynote/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lzq's Note">
+    </span>
+
     
-    
-    <div class="post-block page">
       <header class="post-header">
 
-<h1 class="post-title" itemprop="name headline">tags
-
-</h1>
-
-<div class="post-meta">
-  
-  
-
-
-
-</div>
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
         
         
-          <div class="tag-cloud">
-            <div class="tag-cloud-title">
+          <h1 class="post-title" itemprop="name headline">Spring事务Demo
+
               
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-                
-                  
-                
-              
-              11 tags in total
-            </div>
-            <div class="tag-cloud-tags">
-              
-                <a href="/mynote/tags/XPath/" style="font-size: 12px; color: #ccc">XPath</a> <a href="/mynote/tags/java/" style="font-size: 30px; color: #111">java</a> <a href="/mynote/tags/juc/" style="font-size: 24px; color: #4f4f4f">juc</a> <a href="/mynote/tags/log/" style="font-size: 12px; color: #ccc">log</a> <a href="/mynote/tags/markdown/" style="font-size: 12px; color: #ccc">markdown</a> <a href="/mynote/tags/python/" style="font-size: 12px; color: #ccc">python</a> <a href="/mynote/tags/spring/" style="font-size: 18px; color: #8e8e8e">spring</a> <a href="/mynote/tags/time/" style="font-size: 12px; color: #ccc">time</a> <a href="/mynote/tags/tomcat/" style="font-size: 12px; color: #ccc">tomcat</a> <a href="/mynote/tags/util/" style="font-size: 12px; color: #ccc">util</a> <a href="/mynote/tags/测试/" style="font-size: 12px; color: #ccc">测试</a>
-              
-            </div>
-          </div>
+            
+          </h1>
         
-      </div>
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-07-18 09:22:37 / Modified: 15:46:04" itemprop="dateCreated datePublished" datetime="2020-07-18T09:22:37+08:00">2020-07-18</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
       
       
+
+      
+        <h2 id="Spring-中七种事务传播行为"><a href="#Spring-中七种事务传播行为" class="headerlink" title="Spring 中七种事务传播行为"></a>Spring 中七种事务传播行为</h2><table>
+<thead>
+<tr>
+<th>事务传播行为类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PROPAGATION_REQUIRED</td>
+<td>如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择</td>
+</tr>
+<tr>
+<td>PROPAGATION_SUPPORTS</td>
+<td>支持当前事务，如果当前没有事务，就以非事务方式执行。</td>
+</tr>
+<tr>
+<td>PROPAGATION_MANDATORY</td>
+<td>使用当前的事务，如果当前没有事务，就抛出异常。</td>
+</tr>
+<tr>
+<td>PROPAGATION_REQUIRES_NEW</td>
+<td>新建事务，如果当前存在事务，把当前事务挂起。</td>
+</tr>
+<tr>
+<td>PROPAGATION_NOT_SUPPORTED</td>
+<td>以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。</td>
+</tr>
+<tr>
+<td>ROPAGATION_NEVER</td>
+<td>以非事务方式执行，如果当前存在事务，则抛出异常。</td>
+</tr>
+<tr>
+<td>PROPAGATION_NESTED</td>
+<td>如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION_REQUIRED类似的操作。</td>
+</tr>
+</tbody>
+</table>
+<p>NESTED和REQUIRED修饰的内部方法都属于外围方法事务，如果外围方法抛出异常，这两种方法的事务都会被回滚。但是REQUIRED是加入外围方法事务，所以和外围事务同属于一个事务，一旦REQUIRED事务抛出异常被回滚，外围方法事务也将被回滚。而NESTED是外围方法的子事务，有单独的保存点，所以NESTED方法抛出异常被回滚，不会影响到外围方法的事务。</p>
+<p>NESTED和REQUIRES_NEW都可以做到内部方法事务回滚而不影响外围方法事务。但是因为NESTED是嵌套事务，所以外围方法回滚之后，作为外围方法事务的子事务也会被回滚。而REQUIRES_NEW是通过开启新的事务实现的，内部事务和外围事务是两个事务，外围事务回滚不会影响内部事务。</p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>Springboot启动时自动化配置TransactionAutoConfiguration，这个类配置了事务的切面（TransactionInterceptor），配置了PlatformTransactionManager的实现类（DataSourceTransactionManager）。</p>
+<p>进入切面先将@Transaction注解解析为TransactionDefinition类，通过PlatformTransactionManager获取/提交/回滚事务，获取时判断当前是否存在事务：</p>
+<ol>
+<li><p>若存在，NEVER直接抛异常，NOT_SUPPORTED挂起当前事务，REQUIRES_NEW挂起当前事务建立新的事务，NESTED创建一个保存点，SUPPORTS /REQUIRED/MANDATORY加入当前事务</p>
+</li>
+<li><p>若不存在，MANDATORY直接抛异常，REQUIRED/REQUIRED_NEW/NESTED新开启事务，SUPPORTS/NOT_SUPPORTED/NEVER创建空事务</p>
+</li>
+</ol>
+<p>新建事物：设置自动提交fasle，若是只读事物还需要设置<code>SET TRANSACTION READ ONLY</code>，将当前连接保存到ThreadLocal（resource）中</p>
+<p>事务挂起：在线程中保存与事务处理有关的信息，并将ThreadLocal（resource）里有关的连接移除</p>
+
       
     </div>
-    
-
-
 
     
+
     
     
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/mynote/tags/spring/" rel="tag"># spring</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/mynote/2019/11/23/springbootAndTomcat/" rel="next" title="SpringBoot怎么内嵌Tomcat">
+                <i class="fa fa-chevron-left"></i> SpringBoot怎么内嵌Tomcat
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
   </div>
 
 
@@ -431,8 +534,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -519,6 +631,23 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-中七种事务传播行为"><span class="nav-number">1.</span> <span class="nav-text">Spring 中七种事务传播行为</span></a></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#实现"><span class="nav-number"></span> <span class="nav-text">实现</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
